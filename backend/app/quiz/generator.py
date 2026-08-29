@@ -9,17 +9,22 @@ def generate_quiz_questions(plants: List[Dict[str, Any]]) -> List[Dict[str, Any]
     if not plants:
         return []
 
+    # Use first 5 plants deterministically
     for idx, plant in enumerate(plants[:5]):
-        all_names = [p["name"] for p in plants]
-        distractors = [n for n in all_names if n != plant["name"]]
+        all_names = [p["name"] for p in plants if p["name"] != plant["name"]]
+        distractors = list(dict.fromkeys(all_names))
+        random.seed(idx + 42)
         random.shuffle(distractors)
         opts = [plant["name"]] + distractors[:3]
+        random.seed(idx + 100)
         random.shuffle(opts)
 
         if idx % 2 == 0:
-            q_text = f"Which plant's botanical name is '{plant.get('botanical_name')}' and is used for {', '.join(plant.get('uses', [])[:2])}?"
+            uses_str = ", ".join(plant.get("uses", [])[:2]) if plant.get("uses") else "medicinal therapy"
+            q_text = f"Which plant's botanical name is '{plant.get('botanical_name')}' and is used for {uses_str}?"
         else:
-            q_text = f"Which medicinal plant contains active constituents like {', '.join(plant.get('constituents', [])[:2])}?"
+            constituents_str = ", ".join(plant.get("constituents", [])[:2]) if plant.get("constituents") else "bioactive compounds"
+            q_text = f"Which medicinal plant contains active constituents like {constituents_str}?"
 
         questions.append({
             "id": f"q_{plant['id']}_{idx}",
@@ -40,14 +45,16 @@ def evaluate_quiz_submission(answers: Dict[str, str], plants: List[Dict[str, Any
     total = len(answers) if answers else 5
 
     for q_id, user_ans in answers.items():
-        if correct_mapping.get(q_id) == user_ans or any(p["name"] == user_ans for p in plants):
+        # STRICT evaluation: user answer MUST match the exact plant name for this specific question ID
+        expected = correct_mapping.get(q_id)
+        if expected and user_ans.strip().lower() == expected.strip().lower():
             score += 1
 
     xp_earned = score * 50
 
     return {
         "score": score,
-        "total": total,
+        "total": max(5, total),
         "xpEarned": xp_earned,
         "correctAnswers": correct_mapping
     }

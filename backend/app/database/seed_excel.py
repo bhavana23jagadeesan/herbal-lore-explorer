@@ -106,13 +106,13 @@ CORE_PLANTS = [
 def parse_excel_dataset() -> List[Dict[str, Any]]:
     plants_data = list(CORE_PLANTS)
     seen_ids = set([p["id"] for p in CORE_PLANTS])
+    seen_names = set([p["name"].lower() for p in CORE_PLANTS])
 
     if not os.path.exists(DATASET_PATH):
         print(f"Warning: Dataset file not found at {DATASET_PATH}")
         return plants_data
 
     excel = pd.ExcelFile(DATASET_PATH)
-    # Prefer Sheet1 which contains clean English text
     sheet_name = "Sheet1" if "Sheet1" in excel.sheet_names else excel.sheet_names[0]
     df = pd.read_excel(excel, sheet_name=sheet_name)
 
@@ -134,13 +134,21 @@ def parse_excel_dataset() -> List[Dict[str, Any]]:
             counter += 1
         seen_ids.add(plant_id)
 
-        # Plant Name formatting
+        # Clean, unique name formatting
         english_name = strip_non_ascii(row.get("English Name") or row.get("English Name.1"))
+        parts_b = botanical_name.split()
+
         if english_name:
-            name = english_name.split(",")[0].strip()
+            base_name = english_name.split(",")[0].strip()
+            # If name is repeated or generic (e.g. Acacia, Cassia, Ficus), append species epithet
+            if base_name.lower() in seen_names or (len(parts_b) > 1 and base_name.lower() in ["acacia", "cassia", "ficus", "euphorbia", "piper", "solanum", "sida", "alstonia"]):
+                name = f"{base_name} ({parts_b[0][0]}. {parts_b[1]})"
+            else:
+                name = base_name
         else:
-            parts_b = botanical_name.split()
-            name = parts_b[0].capitalize() if parts_b else botanical_name
+            name = botanical_name
+
+        seen_names.add(name.lower())
 
         common_names = []
         for lang, col_keys in [
