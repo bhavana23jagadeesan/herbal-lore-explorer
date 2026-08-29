@@ -25,64 +25,40 @@ const VOICE_LANGUAGES = [
   { code: "ml-IN", label: "Malayalam (മലയാളം)" },
 ];
 
+function sanitizeMarkdown(text: str): str {
+  if (!text) return "";
+  return text
+    .replace(/#+\s*/g, "") // strip header hashes
+    .replace(/\*\*(.*?)\*\*/g, "$1") // strip bold asterisks
+    .replace(/\*(.*?)\*/g, "$1") // strip italic asterisks
+    .replace(/`(.*?)`/g, "$1") // strip code ticks
+    .trim();
+}
+
 function FormattedText({ content }: { content: string }) {
-  const lines = content.split("\n");
+  const cleanContent = sanitizeMarkdown(content);
+  const lines = cleanContent.split("\n");
 
   return (
-    <div className="space-y-1.5 leading-relaxed text-sm">
+    <div className="space-y-2 leading-relaxed text-sm">
       {lines.map((line, idx) => {
         if (!line.trim()) return <div key={idx} className="h-1" />;
 
-        // Process bold **text** and italic *text*
-        const parts = line.split(/(\*\*.*?\*\*|\*.*?\*)/g);
-        const formattedLine = parts.map((part, pIdx) => {
-          if (part.startsWith("**") && part.endsWith("**")) {
-            return (
-              <strong key={pIdx} className="font-semibold text-emerald-600 dark:text-emerald-400">
-                {part.slice(2, -2)}
-              </strong>
-            );
-          }
-          if (part.startsWith("*") && part.endsWith("*")) {
-            return (
-              <em key={pIdx} className="italic text-foreground/90">
-                {part.slice(1, -1)}
-              </em>
-            );
-          }
-          return part;
-        });
-
         if (line.trim().startsWith("•") || line.trim().startsWith("-")) {
-          const cleanBulletLine = line.trim().replace(/^[•\-]\s*/, "");
-          const bulletParts = cleanBulletLine.split(/(\*\*.*?\*\*|\*.*?\*)/g);
-          const formattedBullet = bulletParts.map((part, pIdx) => {
-            if (part.startsWith("**") && part.endsWith("**")) {
-              return (
-                <strong key={pIdx} className="font-semibold text-emerald-600 dark:text-emerald-400">
-                  {part.slice(2, -2)}
-                </strong>
-              );
-            }
-            if (part.startsWith("*") && part.endsWith("*")) {
-              return (
-                <em key={pIdx} className="italic text-foreground/90">
-                  {part.slice(1, -1)}
-                </em>
-              );
-            }
-            return part;
-          });
-
+          const bulletText = line.trim().replace(/^[•\-]\s*/, "");
           return (
-            <div key={idx} className="flex gap-2 pl-2 items-start my-0.5">
+            <div key={idx} className="flex gap-2 pl-2 items-start my-1">
               <span className="text-emerald-500 font-bold">•</span>
-              <div>{formattedBullet}</div>
+              <span className="text-foreground/95">{bulletText}</span>
             </div>
           );
         }
 
-        return <p key={idx}>{formattedLine}</p>;
+        return (
+          <p key={idx} className="text-foreground/95">
+            {line}
+          </p>
+        );
       })}
     </div>
   );
@@ -93,7 +69,7 @@ function ChatPage() {
     {
       id: "welcome",
       sender: "ai",
-      text: "Hello! I am your IEEE MPI Medicinal Plant AI Assistant. You can ask me in English, Tamil (தமிழ்), Hindi, Telugu, or Malayalam and I will answer strictly in the same language grounded in dataset knowledge.",
+      text: "Hello! I am your IEEE MPI Medicinal Plant AI Assistant. Ask me anything about cold, cough, constipation, knee pain, pimples, cuts, wounds, or farming guidance in English, Tamil (தமிழ்), Hindi, Telugu, or Malayalam and I will answer naturally like ChatGPT in plain text.",
       sources: ["IEEE MPI Dataset"],
       timestamp: new Date(),
     },
@@ -109,10 +85,10 @@ function ChatPage() {
   const recognitionRef = useRef<any>(null);
 
   const samplePrompts = [
-    "காயத்துக்கு ஏதாச்சும் ரெமிடி சொல்லு. (Remedy for wound/cut)",
-    "மஞ்சளின் மருத்துவ பயன்கள் என்ன?",
-    "எனக்கு முகப்பரு இருக்கு. ஏதாச்சும் ரெமீடீ சொல்லு.",
-    "What are the medicinal uses of turmeric?",
+    "காயத்துக்கு ஏதாச்சும் ரெமிடி சொல்லு",
+    "எனக்கு முகப்பரு இருக்கு. ஏதாச்சும் ரெமீடீ சொல்லு",
+    "Remedy for constipation and digestive issues",
+    "Remedy for knee joint pain and swelling",
   ];
 
   const scrollToBottom = () => {
@@ -184,7 +160,7 @@ function ChatPage() {
     }
 
     window.speechSynthesis.cancel();
-    const cleanText = text.replace(/\*\*/g, "").replace(/\*/g, "").replace(/#/g, "");
+    const cleanText = sanitizeMarkdown(text);
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
@@ -229,7 +205,7 @@ function ChatPage() {
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
-        text: response.answer,
+        text: sanitizeMarkdown(response.answer),
         sources: response.sources,
         timestamp: new Date(),
       };
@@ -246,22 +222,26 @@ function ChatPage() {
 
       if (lower.includes("cut") || lower.includes("wound") || lower.includes("finger") || userText.includes("காய") || userText.includes("வெட்டு")) {
         fallbackAnswer = isTamil
-          ? "### 🌿 காயங்கள் மற்றும் வெட்டுக்காயங்களுக்கான மூலிகை சிகிச்சை\n\n#### 🛒 தேவையான பொருட்கள்\n- **மஞ்சள் தூள் / விழுது**: 1 தேக்கரண்டி\n- **கற்றாழை ஜெல்**: 1 மேஜைக்கரண்டி\n- **தேங்காய் எண்ணெய்**: 3 சொட்டுகள்\n\n#### 🥣 பயன்படுத்தும் முறை\n1. காயத்தை சுத்தமான நீரில் நன்கு கழுவவும்.\n2. மஞ்சள் மற்றும் கற்றாழை ஜெல்லை தேங்காய் எண்ணெயுடன் கலந்து காயத்தின் மீது தடவி சுத்தமான துணியால் கட்டவும்."
-          : "### 🌿 Turmeric & Aloe Vera Antiseptic Poultice for Cuts & Wounds\n\n#### 🛒 Ingredients\n- **Turmeric Powder**: 1 teaspoon\n- **Aloe Vera Gel**: 1 tablespoon\n- **Coconut Oil**: 3 drops\n\n#### 🥣 Application\n1. Wash the cut with clean water.\n2. Apply turmeric aloe paste topically over the wound to stop bleeding and prevent bacterial infection.";
-      } else if (lower.includes("pimple") || lower.includes("acne") || lower.includes("face") || userText.includes("முகப்பரு") || userText.includes("பரு")) {
+          ? "🌿 காயங்கள் மற்றும் வெட்டுக்காயங்களுக்கான இயற்கை மூலிகை சிகிச்சை\n\n🛒 தேவையான பொருட்கள்:\n• மஞ்சள் தூள் / விழுது: 1 தேக்கரண்டி\n• கற்றாழை ஜெல்: 1 மேஜைக்கரண்டி\n• தேங்காய் எண்ணெய்: 3 சொட்டுகள்\n• சுத்தமான துணி\n\n🥣 பயன்படுத்தும் முறை:\n1. காயமடைந்த இடத்தை சுத்தமான நீரில் கழுவவும்.\n2. மஞ்சள் தூள் மற்றும் கற்றாழை ஜெல்லை தேங்காய் எண்ணெயுடன் கலந்து கிருமி நாசினி விழுதாக ஆக்கவும்.\n3. விழுதை காயத்தின் மீது தடவி சுத்தமான துணியால் கட்டவும்."
+          : "🌿 Turmeric & Aloe Vera Antiseptic Poultice for Cuts & Wounds\n\n🛒 Required Ingredients:\n• Turmeric Powder: 1 teaspoon\n• Aloe Vera Gel: 1 tablespoon\n• Coconut Oil: 3 drops\n\n🥣 Preparation & Application:\n1. Clean the wound with water.\n2. Mix turmeric aloe paste and apply topically to stop bleeding and prevent infection.";
+      } else if (lower.includes("constipation") || userText.includes("மல")) {
         fallbackAnswer = isTamil
-          ? "### 🌿 முகப்பருவிற்கான இயற்கை மூலிகை சிகிச்சை (Neem & Sandalwood Pack)\n\n#### 🛒 தேவையான பொருட்கள்\n- **வேப்பிலை பொடி**: 1 தேக்கரண்டி\n- **சந்தனப் பொடி**: 1 தேக்கரண்டி\n- **கஸ்தூரி மஞ்சள்**: 1/2 தேக்கரண்டி\n- **பன்னீர் / கற்றாழை ஜெல்**: 1 மேஜைக்கரண்டி\n\n#### 🥣 செய்முறை & பயன்படுத்தும் முறை\n1. வேப்பிலை பொடி, சந்தனப் பொடி மற்றும் கஸ்தூரி மஞ்சளை பன்னீருடன் கலந்து மென்மையான விழுதாக ஆக்கவும்.\n2. முகத்தைக் கழுவி, முகப்பரு உள்ள இடங்களில் இந்த விழுதைத் தடவவும்.\n3. 15 முதல் 20 நிமிடங்கள் ஊறவைத்து, பின்னர் குளிர்ந்த நீரில் கழுவவும்.\n\n• **மருத்துவ குணம்**: வேப்பம்பருப்பு மற்றும் மஞ்சளில் உள்ள கிருமி நாசினி பொருட்கள் முகப்பருவை உண்டாக்கும் பாக்டீரியாக்களை அழிக்கிறது."
-          : "### 🌿 Neem & Sandalwood Anti-Acne Face Pack\n\n#### 🛒 Ingredients\n- **Neem Powder**: 1 teaspoon\n- **Sandalwood Powder**: 1 teaspoon\n- **Wild Turmeric (Kasthuri Manjal)**: 1/2 teaspoon\n- **Rose Water / Aloe Vera Gel**: 1 tablespoon\n\n#### 🥣 Preparation & Application\n1. Mix Neem powder, sandalwood powder, and wild turmeric with rose water into a smooth paste.\n2. Apply gently over acne spots and pimples.\n3. Leave on for 15-20 minutes and rinse with cool water.\n\n• **Action**: Nimbin and Curcumin kill acne-causing bacteria and soothe inflammation.";
-      } else if (userText.includes("மஞ்சள") || userText.includes("மஞ்சள்") || lower.includes("turmeric")) {
+          ? "🌿 மலச்சிக்கலுக்கான இயற்கை மூலிகை நிவாரணம்\n\n🛒 தேவையான பொருட்கள்:\n• கற்றாழை ஜெல்: 2 மேஜைக்கரண்டி\n• சோம்பு தூள்: 1 தேக்கரண்டி\n• வெதுவெதுப்பான தண்ணீர்: 1 டம்ளர்\n\n🥣 பயன்படுத்தும் முறை:\n1. கற்றாழை ஜெல்லை வெதுவெதுப்பான தண்ணீரில் கலந்து காலையில் பருகவும்."
+          : "🌿 Natural Aloe Vera & Fennel Remedy for Constipation\n\n🛒 Required Ingredients:\n• Fresh Aloe Vera Gel: 2 tablespoons\n• Crushed Fennel Seeds: 1 teaspoon\n• Warm Water: 1 glass\n\n🥣 Dosage:\n1. Drink fresh on an empty stomach in the morning to relieve constipation.";
+      } else if (lower.includes("knee") || lower.includes("joint") || userText.includes("மூட்டு")) {
         fallbackAnswer = isTamil
-          ? "### 🌿 மஞ்சளின் மருத்துவ பயன்கள் (Curcuma longa)\n\nIEEE MPI தரவுத்தளத்தின்படி, மஞ்சள் ஒரு சிறந்த இயற்கை கிருமி நாசியாகும்:\n\n• **காயங்கள் & தோல் பராமரிப்பு**: மஞ்சளில் உள்ள குர்குமின் (Curcumin) பாக்டீரியா தொற்றுகளை அழிக்கிறது மற்றும் காயங்களை விரைவாக ஆற்றுகிறது.\n• **செரிமானம் & நோய் எதிர்ப்பு சக்தி**: வெதுவெதுப்பான பாலில் 1/2 ஸ்பூன் மஞ்சள் தூள் கலந்து பருகினால் நோய் எதிர்ப்பு சக்தி அதிகரிக்கும்.\n• **வீக்க எதிர்ப்பு**: மூட்டு வலி மற்றும் தொண்டை புண்ணை ஆற்றுவதில் முக்கிய பங்கு வகிக்கிறது."
-          : "### 🌿 Medicinal Uses of Turmeric (*Curcuma longa*)\n\nBased on the IEEE MPI dataset, Turmeric is a potent natural antiseptic and anti-inflammatory herb:\n\n• **Antiseptic & Wound Healing**: Curcumin in turmeric inhibits bacterial growth and accelerates skin regeneration.\n• **Immunity Booster**: Drinking 1/2 tsp turmeric in warm milk boosts respiratory immunity.\n• **Anti-inflammatory Action**: Relieves joint pain, sore throat, and digestive inflammation.";
+          ? "🌿 மூட்டு வலி மற்றும் முழங்கால் வீக்கத்திற்கான மூலிகை தைலம்\n\n🛒 தேவையான பொருட்கள்:\n• கடுகு எண்ணெய்: 2 மேஜைக்கரண்டி\n• மஞ்சள் தூள்: 1/2 தேக்கரண்டி\n• கற்பூரம்: 1 சிட்டிகை\n\n🥣 பயன்படுத்தும் முறை:\n1. எண்ணெயை கதகதப்பாக சூடாக்கி மூட்டுகளில் தினமும் இருவேளை நீவவும்."
+          : "🌿 Warm Mustard & Turmeric Liniment for Knee & Joint Pain\n\n🛒 Required Ingredients:\n• Warm Mustard Oil: 2 tablespoons\n• Turmeric Powder: 1/2 teaspoon\n• Camphor: 1 pinch\n\n🥣 Application:\n1. Gently massage the warm oil over painful knee joints twice daily.";
+      } else if (lower.includes("pimple") || lower.includes("acne") || userText.includes("முகப்பரு") || userText.includes("பரு")) {
+        fallbackAnswer = isTamil
+          ? "🌿 முகப்பருவிற்கான இயற்கை மூலிகை சிகிச்சை\n\n🛒 தேவையான பொருட்கள்:\n• வேப்பிலை பொடி: 1 தேக்கரண்டி\n• சந்தனப் பொடி: 1 தேக்கரண்டி\n• கஸ்தூரி மஞ்சள்: 1/2 தேக்கரண்டி\n• பன்னீர் / கற்றாழை ஜெல்: 1 மேஜைக்கரண்டி\n\n🥣 பயன்படுத்தும் முறை:\n1. விழுதை முகப்பரு உள்ள இடங்களில் தடவி 15 நிமிடங்கள் ஊறவைத்து கழுவவும்."
+          : "🌿 Neem & Sandalwood Anti-Acne Clarifying Face Pack\n\n🛒 Ingredients:\n• Neem Powder: 1 teaspoon\n• Sandalwood Powder: 1 teaspoon\n• Wild Turmeric: 1/2 teaspoon\n• Rose Water: 1 tablespoon\n\n🥣 Application:\n1. Apply paste over acne spots for 15-20 minutes, then rinse.";
       }
 
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
-        text: fallbackAnswer,
+        text: sanitizeMarkdown(fallbackAnswer),
         sources: ["IEEE MPI Dataset"],
         timestamp: new Date(),
       };
@@ -276,7 +256,7 @@ function ChatPage() {
       <PageHeader
         eyebrow="Grounded LLM Intelligence"
         title="MPI Botanical AI Assistant"
-        subtitle="Ask questions in English, Tamil, Hindi, Telugu, or Malayalam using text or voice to generate grounded herbal recipes and farmer commercial market guidance."
+        subtitle="Ask questions about cold, cough, constipation, knee pain, pimples, cuts, wounds, or farming guidance naturally like ChatGPT in clean plain text."
       />
 
       <div className="mx-auto max-w-4xl glass-strong rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col h-[70vh]">
@@ -359,7 +339,7 @@ function ChatPage() {
               </div>
               <div className="glass px-4 py-3 rounded-2xl flex items-center gap-2">
                 <Loader2 className="size-4 animate-spin text-primary" />
-                <span>Searching MPI dataset & generating guidance...</span>
+                <span>Generating ChatGPT response...</span>
               </div>
             </motion.div>
           )}
@@ -436,7 +416,7 @@ function ChatPage() {
 
           <input
             type="text"
-            placeholder="Ask in English or Tamil (e.g. காயத்துக்கு ஏதாச்சும் ரெமிடி / மஞ்சளின் பயன்கள்)..."
+            placeholder="Ask about cold, cough, constipation, knee pain, pimples, cuts/wounds..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
