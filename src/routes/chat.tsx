@@ -93,7 +93,7 @@ function ChatPage() {
     {
       id: "welcome",
       sender: "ai",
-      text: "Hello! I am your IEEE MPI Medicinal Plant AI Assistant powered by Nemotron-3 Ultra. Ask me about herbal remedies, recipes, or farming guidance (where to sell, market value, cultivation, profit) in English, Tamil, Telugu, Hindi, or Malayalam.",
+      text: "Hello! I am your IEEE MPI Medicinal Plant AI Assistant powered by Nemotron-3 Ultra. Ask me about herbal remedies, recipes, cuts & wounds, or farming guidance (where to sell, market value, cultivation, profit) in English, Tamil, Telugu, Hindi, or Malayalam.",
       sources: ["IEEE MPI Dataset"],
       timestamp: new Date(),
     },
@@ -109,10 +109,10 @@ function ChatPage() {
   const recognitionRef = useRef<any>(null);
 
   const samplePrompts = [
+    "I have a cut in my finger, what herbal remedy should I apply?",
     "I have a cold and cough, what herbal recipe should I drink?",
     "Coriander tea recipe for headache relief",
     "கத்தாலை செடி வச்சா எனக்கு லாபமா? (Is Aloe Vera farming profitable?)",
-    "Where to sell Tulsi crops and what is the market value per kg?",
   ];
 
   const scrollToBottom = () => {
@@ -240,7 +240,11 @@ function ChatPage() {
       let fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Tulsi Ginger Honey Kudineer*\n\n#### 🛒 Required Ingredients\n- **Fresh Tulsi Leaves**: 8 to 10 leaves\n- **Crushed Fresh Ginger**: 1 inch piece\n- **Black Pepper**: 3 crushed peppercorns\n- **Raw Honey**: 1 tablespoon\n- **Water**: 300 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil 300 ml water with ginger, Tulsi leaves, and black pepper for 6 minutes.\n2. Strain into a cup, mix in honey, and drink warm twice daily.\n\n• **Action**: Provides powerful antiviral and respiratory cold & cough relief.";
       const lower = userText.toLowerCase();
 
-      if (lower.includes("headache") || lower.includes("தலைவலி") || lower.includes("தலை")) {
+      if (lower.includes("cut") || lower.includes("wound") || lower.includes("finger") || lower.includes("injury") || lower.includes("bleeding") || lower.includes("skin") || lower.includes("காயம்") || lower.includes("வெட்டு")) {
+        fallbackAnswer = "### 🌿 Recommended Herbal Remedy: *Turmeric & Aloe Vera Antiseptic Poultice*\n\nHere is a traditional ethnobotanical remedy for cuts, finger injuries, and skin wounds:\n\n#### 🛒 Required Ingredients\n- **Fresh Turmeric Paste (Manjal)**: 1 teaspoon\n- **Fresh Aloe Vera Gel (Kattarazhai)**: 1 tablespoon\n- **Coconut Oil / Neem Oil**: 3 drops\n- **Clean Sterile Gauze / Bandage**\n\n#### 🥣 Preparation & Application Instructions\n1. Wash the cut or wound thoroughly with clean water.\n2. Mix fresh turmeric paste with Aloe Vera gel and 3 drops of coconut oil into a smooth antiseptic paste.\n3. Apply the paste gently over the cut/wound.\n4. Cover with clean gauze to stop bleeding, prevent bacterial infection, and accelerate skin healing.\n\n---\n• **Bio-Active Mechanism**: Curcumin and Aloin provide potent natural antibacterial, anti-inflammatory, and rapid wound-clotting action.";
+      } else if (lower.includes("stomach") || lower.includes("belly") || lower.includes("diarrhea") || lower.includes("gas") || lower.includes("வயிறு")) {
+        fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Pomegranate Peel & Cumin Soothing Decoction*\n\n#### 🛒 Required Ingredients\n- **Dried Pomegranate Peel Powder**: 1 teaspoon\n- **Cumin Seeds (Jeeragam)**: 1/2 teaspoon\n- **Warm Water**: 250 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil pomegranate peel powder and cumin seeds in 250 ml water for 5 minutes.\n2. Strain and sip warm to relieve stomach cramps and intestinal discomfort.";
+      } else if (lower.includes("headache") || lower.includes("தலைவலி") || lower.includes("தலை")) {
         fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Coriander Ginger Relief Infusion*\n\n#### 🛒 Required Ingredients\n- **Crushed Coriander Seeds (Kothamalli)**: 1 tablespoon\n- **Fresh Crushed Ginger**: 1/2 inch piece\n- **Palm Jaggery / Honey**: 1 teaspoon\n- **Water**: 300 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil coriander seeds and ginger in 300 ml water for 6 minutes.\n2. Strain into a cup, add jaggery/honey, and sip warm.\n\n• **Action**: Relieves head pressure and vascular headache tension.";
       } else if (lower.includes("cold") || lower.includes("sali") || lower.includes("சளி") || lower.includes("கோல்ட்") || lower.includes("கோல்டா") || lower.includes("கோல்டாக") || lower.includes("இருமல்")) {
         fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Tulsi Ginger Honey Kudineer*\n\n#### 🛒 Required Ingredients\n- **Fresh Tulsi Leaves**: 8 to 10 leaves\n- **Crushed Fresh Ginger**: 1 inch piece\n- **Black Pepper**: 3 crushed peppercorns\n- **Raw Honey**: 1 tablespoon\n- **Water**: 300 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil 300 ml water with ginger, Tulsi leaves, and black pepper for 6 minutes.\n2. Strain into a cup, mix in honey, and drink warm twice daily.\n\n• **Action**: Provides powerful antiviral and respiratory cold & cough relief.";
@@ -426,7 +430,7 @@ function ChatPage() {
 
           <input
             type="text"
-            placeholder="Ask about cold, cough, headache, constipation, or where to sell crops..."
+            placeholder="Ask about cuts/wounds, cold, cough, headache, or where to sell crops..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}

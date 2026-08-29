@@ -10,6 +10,22 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash:free")
 
 RECIPE_TEMPLATES = {
+    "wound": {
+        "title": "Turmeric & Aloe Vera Antiseptic Poultice",
+        "ingredients": [
+            "Fresh Turmeric Powder / Paste (Manjal): 1 teaspoon",
+            "Fresh Aloe Vera Gel (Kattarazhai): 1 tablespoon",
+            "Neem Oil / Virgin Coconut Oil: 3 drops",
+            "Clean Sterile Gauze / Bandage"
+        ],
+        "steps": [
+            "Clean the cut or wound thoroughly with clean running water.",
+            "Mix fresh turmeric paste with Aloe Vera gel and 3 drops of coconut oil into a smooth paste.",
+            "Apply the antiseptic paste gently over the cut/wound.",
+            "Cover with sterile gauze to stop bleeding, prevent bacterial infection, and accelerate skin tissue regeneration.",
+            "Reapply twice daily until healed."
+        ]
+    },
     "cough": {
         "title": "Tulsi Ginger Honey Kudineer (Traditional Decoction)",
         "ingredients": [
@@ -44,21 +60,6 @@ RECIPE_TEMPLATES = {
             "Drink warm twice daily after meals until symptoms subside."
         ]
     },
-    "constipation": {
-        "title": "Aloe Vera & Fennel Soothing Elixir",
-        "ingredients": [
-            "Fresh Aloe Vera Gel: 2 tablespoons (scooped from fresh leaf)",
-            "Fennel Seeds (Sombu): 1 teaspoon (crushed)",
-            "Lemon Juice: 1 teaspoon",
-            "Warm Water: 250 ml (1 glass)"
-        ],
-        "steps": [
-            "Wash a fresh Aloe Vera leaf thoroughly and scoop out 2 tbsp of clear inner gel.",
-            "Blend the Aloe Vera gel with 250 ml of warm water and crushed fennel seeds.",
-            "Add a squeeze of fresh lemon juice.",
-            "Consume fresh on an empty stomach in the morning for gentle digestive motility."
-        ]
-    },
     "headache": {
         "title": "Coriander Ginger Relief Infusion",
         "ingredients": [
@@ -72,6 +73,34 @@ RECIPE_TEMPLATES = {
             "Boil on medium heat for 6 minutes until aromatic.",
             "Strain into a mug and sweeten with palm jaggery or honey.",
             "Sip slowly while warm to relieve vascular tension and head pressure."
+        ]
+    },
+    "stomach": {
+        "title": "Pomegranate Peel & Cumin Soothing Decoction",
+        "ingredients": [
+            "Dried Pomegranate Peel Powder / Fresh Peel: 1 teaspoon",
+            "Cumin Seeds (Jeeragam): 1/2 teaspoon",
+            "Curd / Warm Water: 250 ml"
+        ],
+        "steps": [
+            "Boil pomegranate peel and cumin seeds in 250 ml water for 5 minutes.",
+            "Strain the liquid into a cup.",
+            "Sip warm to calm intestinal spasms, relieve stomach ache, and stop diarrhea."
+        ]
+    },
+    "constipation": {
+        "title": "Aloe Vera & Fennel Soothing Elixir",
+        "ingredients": [
+            "Fresh Aloe Vera Gel: 2 tablespoons (scooped from fresh leaf)",
+            "Fennel Seeds (Sombu): 1 teaspoon (crushed)",
+            "Lemon Juice: 1 teaspoon",
+            "Warm Water: 250 ml (1 glass)"
+        ],
+        "steps": [
+            "Wash a fresh Aloe Vera leaf thoroughly and scoop out 2 tbsp of clear inner gel.",
+            "Blend the Aloe Vera gel with 250 ml of warm water and crushed fennel seeds.",
+            "Add a squeeze of fresh lemon juice.",
+            "Consume fresh on an empty stomach in the morning for gentle digestive motility."
         ]
     },
     "fever": {
@@ -88,28 +117,30 @@ RECIPE_TEMPLATES = {
             "Strain and drink warm twice daily during fever recovery."
         ]
     },
-    "indigestion": {
-        "title": "Cumin & Ajwain Digestive Tea",
+    "joint": {
+        "title": "Mustard & Turmeric Anti-Inflammatory Liniment",
         "ingredients": [
-            "Cumin Seeds (Jeeragam): 1 teaspoon",
-            "Carom Seeds (Ajwain): 1/2 teaspoon",
-            "Water: 300 ml"
+            "Warm Mustard Oil / Sesame Oil: 2 tablespoons",
+            "Turmeric Powder: 1/2 teaspoon",
+            "Camphor (Karpuram): 1 small pinch"
         ],
         "steps": [
-            "Lightly roast cumin and carom seeds in a pan for 30 seconds.",
-            "Add 300 ml water and boil for 5 minutes.",
-            "Strain and sip warm after heavy meals."
+            "Warm mustard oil gently in a small pan.",
+            "Add turmeric powder and camphor until dissolved.",
+            "Gently massage the warm oil onto painful joints twice daily for arthritis & joint pain relief."
         ]
     }
 }
 
 MULTILINGUAL_KEYWORDS = {
+    "wound": ["cut", "cuts", "wound", "wounds", "injury", "finger", "bleeding", "skin", "burn", "காயம்", "வெட்டு", "இரத்தம்", "விரல்", "घाव", "चोट", "gaayam"],
     "cold": ["cold", "colds", "coldag", "sali", "சளி", "கோல்ட்", "கோல்டா", "கோல்டாக", "கோல்டு", "jukaam", "जुकाम", "jalubu", "జలుబు", "jaladhosham", "ജനദോഷം"],
     "cough": ["cough", "coughs", "irumal", "இருமல்", "இருமலாக", "khaansi", "खांसी", "daggu", "దగ్గు", "chuma", "ചുമ"],
     "headache": ["headache", "headaches", "thalai vali", "தலைவலி", "தலை வலி", "தலை வலிக்குது", "தலைவலியாக", "sir dard", "सिर दर्द", "thala noppi", "తల నప్పి", "thala vedana", "തലവേദന"],
+    "stomach": ["stomach", "stomach ache", "belly", "diarrhea", "loose motion", "gas", "வயிறு", "வயிறு வலி", "வயிற்றுப்போக்கு", "pet dard", "पेट दर्द"],
     "fever": ["fever", "fevers", "kaichal", "காய்ச்சல்", "காய்ச்சலாக", "bukhar", "बुखार", "pani", "പനി"],
     "constipation": ["constipation", "malakattu", "மலச்சிக்கல்", "kabz", "कब्ज", "malabaddhakam", "మలబద్ధకం"],
-    "indigestion": ["indigestion", "seriyamai", "செரியாமை", "gas", "acidity", "digestion"]
+    "joint": ["joint", "knee", "arthritis", "joint pain", "knee pain", "மூட்டு", "மூட்டு வலி", "joint pain"]
 }
 
 FARMER_KEYWORDS = [
@@ -124,8 +155,8 @@ async def call_openrouter_api(question: str, context_str: str) -> str:
     system_prompt = (
         "You are an expert AI Ethnopharmacology & Agricultural Specialist for the Vanaspati IEEE MPI Heritage Explorer. "
         "You are fluent in English, Tamil, Telugu, Hindi, Malayalam, and Indian regional languages. "
-        "DIRECTIVE FOR HEALTH SYMPTOMS: If the user asks about symptoms in English, Tamil (e.g. கோல்ட், சளி, தலைவலி, இருமல்), Telugu, Hindi, or Malayalam, format your response with a structured **Traditional Herbal Recipe & Remedy Guide** (Title, Ingredients with exact quantities like 1 tsp/250ml/8 leaves, Preparation steps, Bio-active action).\n"
-        "DIRECTIVE FOR FARMERS / PROFITABILITY: If a farmer or user asks where to sell, market value, profitability, or cultivation practices, format your response with a structured **Farmer Commercial & Profitability Guide** (Cultivation practices, Market Rate per ton/kg, Net Profit Potential, Direct Buying Outlets & Government e-CHARAK portals).\n"
+        "DIRECTIVE FOR HEALTH SYMPTOMS: Match the user's specific symptom accurately (cuts/wounds -> Turmeric Aloe Antiseptic Poultice; headache -> Coriander Ginger Tea; cold/cough -> Tulsi Kudineer; stomach ache -> Pomegranate Cumin Tea; fever -> Nilavembu; constipation -> Aloe Fennel Elixir; joint pain -> Warm Mustard Liniment).\n"
+        "DIRECTIVE FOR FARMERS: If asked about farming/selling/profitability, format a structured **Farmer Commercial Guide**.\n"
         "Always write responses in clean English letters so the Text-to-Speech audio reader can speak it out loud clearly."
     )
 
@@ -137,7 +168,7 @@ async def call_openrouter_api(question: str, context_str: str) -> str:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        "temperature": 0.4,
+        "temperature": 0.3,
         "max_tokens": 600
     }
 
@@ -190,7 +221,7 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
     except Exception as e:
         print(f"OpenRouter fast timeout fallback: {e}")
 
-    # 1. Multi-lingual Symptom Recipe Fallback Engine (Priority 1 for health queries)
+    # 1. Multi-lingual Symptom Recipe Fallback Engine (Matched strictly per symptom)
     recipe = None
     for target_sym, aliases in MULTILINGUAL_KEYWORDS.items():
         if any(alias in q_lower for alias in aliases):
@@ -201,9 +232,9 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
         ing_list = "\n".join([f"- **{ing}**" for ing in recipe["ingredients"]])
         step_list = "\n".join([f"{i+1}. {step}" for i, step in enumerate(recipe["steps"])])
 
-        plant_name = context_plants[0]['name'] if context_plants else "Tulsi (Holy Basil)"
-        bot_name = context_plants[0]['botanical_name'] if context_plants else "Ocimum tenuiflorum"
-        consts = ", ".join(context_plants[0]['constituents']) if context_plants else "Eugenol, Gingerol, Active Bio-Alkaloids"
+        plant_name = context_plants[0]['name'] if context_plants else "Turmeric / Aloe Vera / Tulsi"
+        bot_name = context_plants[0]['botanical_name'] if context_plants else "Curcuma longa / Aloe barbadensis"
+        consts = ", ".join(context_plants[0]['constituents']) if context_plants else "Curcumin, Aloin, Active Bio-Alkaloids"
 
         ans = (
             f"### 🍵 Recommended Herbal Recipe: *{recipe['title']}*\n\n"
@@ -213,7 +244,7 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             f"---\n"
             f"#### 🧪 Bio-Active Compounds & Mechanism\n"
             f"• **Active Phytochemicals**: {consts}\n"
-            f"• **Mechanism of Action**: Provides potent anti-inflammatory, antimicrobial, and respiratory soothing benefits validated in traditional ethnopharmacology."
+            f"• **Mechanism of Action**: Provides potent anti-inflammatory, antiseptic wound-healing, and symptom-soothing benefits validated in traditional ethnopharmacology."
         )
         return {
             "answer": ans,
