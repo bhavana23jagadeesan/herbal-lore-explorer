@@ -15,13 +15,47 @@ from app.auth.password import get_password_hash
 
 DATASET_PATH = r"c:\Users\Welcome\Desktop\anna_university\dataset\MPI Dataset (1).xlsx"
 
+BOTANICAL_COMMON_NAME_MAP = {
+    "abrus precatorius": "Rosary Pea (Gunja)",
+    "abutilon indicum": "Indian Mallow (Thuthi)",
+    "acacia arabica": "Gum Arabic Tree (Babul)",
+    "acacia catechu": "Black Cutch (Khadira)",
+    "acacia concinna": "Shikakai (Soapnut)",
+    "acacia farnesiana": "Sweet Acacia (Kasturi)",
+    "acacia leucophloea": "White Bark Acacia (Velvelam)",
+    "acalypha indica": "Indian Nettle (Kuppaimeni)",
+    "acalypha hispida": "Chenille Plant (Cat Tail)",
+    "acanthus ilicifolius": "Sea Holly (Attumulli)",
+    "achyranthes aspera": "Prickly Chaff Flower (Nayuruvi)",
+    "aconitum heterophyllum": "Indian Atees (Atividayam)",
+    "aloe barbadensis": "Aloe Vera (Kattarazhai)",
+    "aloe vera": "Aloe Vera (Kattarazhai)",
+    "azadirachta indica": "Neem (Vembu)",
+    "ocimum tenuiflorum": "Tulsi (Holy Basil)",
+    "ocimum sanctum": "Tulsi (Holy Basil)",
+    "withania somnifera": "Ashwagandha (Indian Ginseng)",
+    "terminalia chebula": "Haritaki (Kadukai)",
+    "terminalia bellirica": "Bibhitaki (Thandri)",
+    "emblica officinalis": "Amla (Indian Gooseberry)",
+    "phyllanthus emblica": "Amla (Indian Gooseberry)",
+    "piper nigrum": "Black Pepper (Milagu)",
+    "piper longum": "Long Pepper (Thippili)",
+    "zingiber officinale": "Ginger (Inji)",
+    "curcuma longa": "Turmeric (Manjal)",
+    "centella asiatica": "Gotu Kola (Vallarai)",
+    "bacopa monnieri": "Brahmi (Neerbrahmi)",
+    "andrographis paniculata": "King of Bitters (Nilavembu)",
+    "syzygium cumini": "Jamun (Nawal)",
+    "tinospora cordifolia": "Heart-leaved Moonseed (Seenthil)",
+    "ricinus communis": "Castor Bean (Amanakku)",
+}
+
 def strip_non_ascii(val: Any) -> str:
     if pd.isna(val) or val is None:
         return ""
     text = str(val).strip()
     if not text or "#value" in text.lower() or text.lower() == "nan" or text.lower() == "nil":
         return ""
-    # Strip Tamil characters and non-ASCII script
     cleaned = re.sub(r'[\u0b80-\u0bff]', '', text)
     cleaned = re.sub(r'\(\s*\)', '', cleaned)
     cleaned = re.sub(r'\[\s*\]', '', cleaned)
@@ -66,7 +100,7 @@ def derive_regions(row: pd.Series, idx: int) -> List[str]:
 CORE_PLANTS = [
     {
         "id": "aloe_vera",
-        "name": "Aloe Vera",
+        "name": "Aloe Vera (Kattarazhai)",
         "botanical_name": "Aloe barbadensis miller",
         "family": "Asphodelaceae",
         "common_names": [
@@ -134,19 +168,22 @@ def parse_excel_dataset() -> List[Dict[str, Any]]:
             counter += 1
         seen_ids.add(plant_id)
 
-        # Clean, unique name formatting
-        english_name = strip_non_ascii(row.get("English Name") or row.get("English Name.1"))
-        parts_b = botanical_name.split()
-
-        if english_name:
-            base_name = english_name.split(",")[0].strip()
-            # If name is repeated or generic (e.g. Acacia, Cassia, Ficus), append species epithet
-            if base_name.lower() in seen_names or (len(parts_b) > 1 and base_name.lower() in ["acacia", "cassia", "ficus", "euphorbia", "piper", "solanum", "sida", "alstonia"]):
-                name = f"{base_name} ({parts_b[0][0]}. {parts_b[1]})"
-            else:
-                name = base_name
+        # Friendly English & Common Name mapping
+        bot_key = botanical_name.lower().strip()
+        if bot_key in BOTANICAL_COMMON_NAME_MAP:
+            name = BOTANICAL_COMMON_NAME_MAP[bot_key]
         else:
-            name = botanical_name
+            english_name = strip_non_ascii(row.get("English Name") or row.get("English Name.1"))
+            parts_b = botanical_name.split()
+
+            if english_name:
+                base_name = english_name.split(",")[0].strip()
+                if base_name.lower() in seen_names or (len(parts_b) > 1 and base_name.lower() in ["acacia", "cassia", "ficus", "euphorbia", "piper", "solanum", "sida", "alstonia"]):
+                    name = f"{base_name} ({parts_b[0][0]}. {parts_b[1]})"
+                else:
+                    name = base_name
+            else:
+                name = " ".join([p.capitalize() for p in parts_b])
 
         seen_names.add(name.lower())
 
