@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=sqlite+aiosqlite:///./mpi_database.db
+      - SECRET_KEY=vanaspati_secret_jwt_key_2026
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    volumes:
+      - ./mpi_database.db:/app/mpi_database.db
+    restart: always

@@ -87,7 +87,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
               ))}
             </nav>
+
             <ThemeToggle />
+
             <button
               onClick={() => setOpen((v) => !v)}
               aria-label="Toggle menu"
