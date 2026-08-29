@@ -101,7 +101,35 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
 
     # Fallback Engine with Strict Language & Relevance Matching
 
-    # 1. Turmeric Queries (மஞ்சள் / மஞ்சளின் / மஞ்சளுக்கு / மஞ்சளை / turmeric)
+    # 1. Wounds / Cuts / Injuries (காயத்துக்கு / காயத்திற்கு / காயம் / வெட்டு / இரத்தம் / cut / wound)
+    if any(w in q_lower or w in question for w in ["cut", "wound", "injury", "finger", "bleeding", "காய", "வெட்டு", "இரத்த"]):
+        if in_tamil:
+            ans = (
+                "### 🌿 காயங்கள் மற்றும் வெட்டுக்காயங்களுக்கான மூலிகை சிகிச்சை\n\n"
+                "#### 🛒 தேவையான பொருட்கள்\n"
+                "- **மஞ்சள் தூள் / விழுது**: 1 தேக்கரண்டி\n"
+                "- **கற்றாழை ஜெல்**: 1 மேஜைக்கரண்டி\n"
+                "- **தேங்காய் எண்ணெய்**: 3 சொட்டுகள்\n"
+                "- **சுத்தமான துணி / கட்டுக்கட்டு**\n\n"
+                "#### 🥣 பயன்படுத்தும் முறை\n"
+                "1. காயத்தை சுத்தமான நீரில் நன்கு கழுவவும்.\n"
+                "2. மஞ்சள் மற்றும் கற்றாழை ஜெல்லை தேங்காய் எண்ணெயுடன் கலந்து கிருமி நாசினி விழுதாக ஆக்கவும்.\n"
+                "3. விழுதை காயத்தின் மீது தடவி சுத்தமான துணியால் கட்டவும். இது இரத்தப்போக்கை நிறுத்தி காயத்தை விரைவாக ஆற்றும்."
+            )
+        else:
+            ans = (
+                "### 🌿 Turmeric & Aloe Vera Antiseptic Poultice for Cuts & Wounds\n\n"
+                "#### 🛒 Ingredients\n"
+                "- **Turmeric Powder / Paste**: 1 teaspoon\n"
+                "- **Aloe Vera Gel**: 1 tablespoon\n"
+                "- **Coconut Oil**: 3 drops\n\n"
+                "#### 🥣 Application\n"
+                "1. Wash the cut with clean water.\n"
+                "2. Apply turmeric aloe paste topically over the wound to stop bleeding and prevent bacterial infection."
+            )
+        return {"answer": ans, "sources": ["IEEE MPI Dataset"]}
+
+    # 2. Turmeric Queries (மஞ்சள் / மஞ்சளின் / மஞ்சளுக்கு / மஞ்சளை / turmeric)
     if "மஞ்சள" in question or "மஞ்சள்" in question or "turmeric" in q_lower:
         if in_tamil:
             ans = (
@@ -121,8 +149,8 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             )
         return {"answer": ans, "sources": sources if sources else ["IEEE MPI Dataset"]}
 
-    # 2. Pimple / Acne Queries (முகப்பரு / பரு)
-    if any(w in q_lower or w in question for w in ["pimple", "acne", "face", "spots", "முகப்பரு", "பரு", "முகப்பருக்கள்"]):
+    # 3. Pimple / Acne Queries (முகப்பரு / பரு)
+    if any(w in q_lower or w in question for w in ["pimple", "acne", "face", "spots", "முகப்பரு", "பரு"]):
         if in_tamil:
             ans = (
                 "### 🌿 முகப்பருவிற்கான இயற்கை மூலிகை சிகிச்சை (Neem & Sandalwood Pack)\n\n"
@@ -153,34 +181,8 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             )
         return {"answer": ans, "sources": ["IEEE MPI Dataset"]}
 
-    # 3. Wounds / Cuts
-    if any(w in q_lower or w in question for w in ["cut", "wound", "injury", "finger", "bleeding", "காயம்", "வெட்டு", "இரத்தம்"]):
-        if in_tamil:
-            ans = (
-                "### 🌿 காயங்கள் மற்றும் வெட்டுக்காயங்களுக்கான மூலிகை சிகிச்சை\n\n"
-                "#### 🛒 தேவையான பொருட்கள்\n"
-                "- **மஞ்சள் தூள் / விழுது**: 1 தேக்கரண்டி\n"
-                "- **கற்றாழை ஜெல்**: 1 மேஜைக்கரண்டி\n"
-                "- **தேங்காய் எண்ணெய்**: 3 சொட்டுகள்\n\n"
-                "#### 🥣 பயன்படுத்தும் முறை\n"
-                "1. காயத்தை சுத்தமான நீரில் கழுவவும்.\n"
-                "2. மஞ்சள் மற்றும் கற்றாழை ஜெல்லை கலந்து காயத்தின் மீது தடவி சுத்தமான துணியால் கட்டவும்."
-            )
-        else:
-            ans = (
-                "### 🌿 Turmeric & Aloe Vera Antiseptic Poultice for Cuts & Wounds\n\n"
-                "#### 🛒 Ingredients\n"
-                "- **Turmeric Powder**: 1 teaspoon\n"
-                "- **Aloe Vera Gel**: 1 tablespoon\n"
-                "- **Coconut Oil**: 3 drops\n\n"
-                "#### 🥣 Application\n"
-                "1. Wash the cut with clean water.\n"
-                "2. Apply turmeric aloe paste topically over the wound to stop bleeding and prevent bacterial infection."
-            )
-        return {"answer": ans, "sources": ["IEEE MPI Dataset"]}
-
-    # 4. Cold / Cough (சளி / இருமல்)
-    if any(w in q_lower or w in question for w in ["cold", "cough", "சளி", "இருமல்", "கோல்ட்"]):
+    # 4. Cold / Cough (சளி / இருமல் / கோல்ட்)
+    if any(w in q_lower or w in question for w in ["cold", "cough", "சளி", "இருமல", "இருமல்", "கோல்ட"]):
         if in_tamil:
             ans = (
                 "### 🍵 துளசி இஞ்சி மிளகு குடிநீர் (சளி & இருமல் நிவாரணி)\n\n"
@@ -209,7 +211,7 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
         return {"answer": ans, "sources": ["IEEE MPI Dataset"]}
 
     # 5. Farmer Cultivation & Profitability Queries
-    if any(w in q_lower or w in question for w in ["sell", "market", "cultivat", "farming", "profit", "விவசாயி", "விற்க", "சந்தை", "பயிரிடுதல்", "லாபம்", "லாபமா"]):
+    if any(w in q_lower or w in question for w in ["sell", "market", "cultivat", "farming", "profit", "விவசாயி", "விற்க", "சந்தை", "பயிரிட", "லாப"]):
         if in_tamil:
             ans = (
                 "### 🌾 மூலிகை பயிரிடுதல் மற்றும் சந்தை வாய்ப்பு வழிகாட்டி\n\n"

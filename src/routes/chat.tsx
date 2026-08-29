@@ -109,10 +109,10 @@ function ChatPage() {
   const recognitionRef = useRef<any>(null);
 
   const samplePrompts = [
+    "காயத்துக்கு ஏதாச்சும் ரெமிடி சொல்லு. (Remedy for wound/cut)",
     "மஞ்சளின் மருத்துவ பயன்கள் என்ன?",
     "எனக்கு முகப்பரு இருக்கு. ஏதாச்சும் ரெமீடீ சொல்லு.",
     "What are the medicinal uses of turmeric?",
-    "I have a cut in my finger, what remedy should I apply?",
   ];
 
   const scrollToBottom = () => {
@@ -244,18 +244,18 @@ function ChatPage() {
 
       const lower = userText.toLowerCase();
 
-      if (lower.includes("pimple") || lower.includes("acne") || lower.includes("face") || userText.includes("முகப்பரு") || userText.includes("பரு")) {
+      if (lower.includes("cut") || lower.includes("wound") || lower.includes("finger") || userText.includes("காய") || userText.includes("வெட்டு")) {
+        fallbackAnswer = isTamil
+          ? "### 🌿 காயங்கள் மற்றும் வெட்டுக்காயங்களுக்கான மூலிகை சிகிச்சை\n\n#### 🛒 தேவையான பொருட்கள்\n- **மஞ்சள் தூள் / விழுது**: 1 தேக்கரண்டி\n- **கற்றாழை ஜெல்**: 1 மேஜைக்கரண்டி\n- **தேங்காய் எண்ணெய்**: 3 சொட்டுகள்\n\n#### 🥣 பயன்படுத்தும் முறை\n1. காயத்தை சுத்தமான நீரில் நன்கு கழுவவும்.\n2. மஞ்சள் மற்றும் கற்றாழை ஜெல்லை தேங்காய் எண்ணெயுடன் கலந்து காயத்தின் மீது தடவி சுத்தமான துணியால் கட்டவும்."
+          : "### 🌿 Turmeric & Aloe Vera Antiseptic Poultice for Cuts & Wounds\n\n#### 🛒 Ingredients\n- **Turmeric Powder**: 1 teaspoon\n- **Aloe Vera Gel**: 1 tablespoon\n- **Coconut Oil**: 3 drops\n\n#### 🥣 Application\n1. Wash the cut with clean water.\n2. Apply turmeric aloe paste topically over the wound to stop bleeding and prevent bacterial infection.";
+      } else if (lower.includes("pimple") || lower.includes("acne") || lower.includes("face") || userText.includes("முகப்பரு") || userText.includes("பரு")) {
         fallbackAnswer = isTamil
           ? "### 🌿 முகப்பருவிற்கான இயற்கை மூலிகை சிகிச்சை (Neem & Sandalwood Pack)\n\n#### 🛒 தேவையான பொருட்கள்\n- **வேப்பிலை பொடி**: 1 தேக்கரண்டி\n- **சந்தனப் பொடி**: 1 தேக்கரண்டி\n- **கஸ்தூரி மஞ்சள்**: 1/2 தேக்கரண்டி\n- **பன்னீர் / கற்றாழை ஜெல்**: 1 மேஜைக்கரண்டி\n\n#### 🥣 செய்முறை & பயன்படுத்தும் முறை\n1. வேப்பிலை பொடி, சந்தனப் பொடி மற்றும் கஸ்தூரி மஞ்சளை பன்னீருடன் கலந்து மென்மையான விழுதாக ஆக்கவும்.\n2. முகத்தைக் கழுவி, முகப்பரு உள்ள இடங்களில் இந்த விழுதைத் தடவவும்.\n3. 15 முதல் 20 நிமிடங்கள் ஊறவைத்து, பின்னர் குளிர்ந்த நீரில் கழுவவும்.\n\n• **மருத்துவ குணம்**: வேப்பம்பருப்பு மற்றும் மஞ்சளில் உள்ள கிருமி நாசினி பொருட்கள் முகப்பருவை உண்டாக்கும் பாக்டீரியாக்களை அழிக்கிறது."
           : "### 🌿 Neem & Sandalwood Anti-Acne Face Pack\n\n#### 🛒 Ingredients\n- **Neem Powder**: 1 teaspoon\n- **Sandalwood Powder**: 1 teaspoon\n- **Wild Turmeric (Kasthuri Manjal)**: 1/2 teaspoon\n- **Rose Water / Aloe Vera Gel**: 1 tablespoon\n\n#### 🥣 Preparation & Application\n1. Mix Neem powder, sandalwood powder, and wild turmeric with rose water into a smooth paste.\n2. Apply gently over acne spots and pimples.\n3. Leave on for 15-20 minutes and rinse with cool water.\n\n• **Action**: Nimbin and Curcumin kill acne-causing bacteria and soothe inflammation.";
-      } else if (userText.includes("மஞ்சள்") || lower.includes("turmeric")) {
+      } else if (userText.includes("மஞ்சள") || userText.includes("மஞ்சள்") || lower.includes("turmeric")) {
         fallbackAnswer = isTamil
           ? "### 🌿 மஞ்சளின் மருத்துவ பயன்கள் (Curcuma longa)\n\nIEEE MPI தரவுத்தளத்தின்படி, மஞ்சள் ஒரு சிறந்த இயற்கை கிருமி நாசியாகும்:\n\n• **காயங்கள் & தோல் பராமரிப்பு**: மஞ்சளில் உள்ள குர்குமின் (Curcumin) பாக்டீரியா தொற்றுகளை அழிக்கிறது மற்றும் காயங்களை விரைவாக ஆற்றுகிறது.\n• **செரிமானம் & நோய் எதிர்ப்பு சக்தி**: வெதுவெதுப்பான பாலில் 1/2 ஸ்பூன் மஞ்சள் தூள் கலந்து பருகினால் நோய் எதிர்ப்பு சக்தி அதிகரிக்கும்.\n• **வீக்க எதிர்ப்பு**: மூட்டு வலி மற்றும் தொண்டை புண்ணை ஆற்றுவதில் முக்கிய பங்கு வகிக்கிறது."
           : "### 🌿 Medicinal Uses of Turmeric (*Curcuma longa*)\n\nBased on the IEEE MPI dataset, Turmeric is a potent natural antiseptic and anti-inflammatory herb:\n\n• **Antiseptic & Wound Healing**: Curcumin in turmeric inhibits bacterial growth and accelerates skin regeneration.\n• **Immunity Booster**: Drinking 1/2 tsp turmeric in warm milk boosts respiratory immunity.\n• **Anti-inflammatory Action**: Relieves joint pain, sore throat, and digestive inflammation.";
-      } else if (lower.includes("cut") || lower.includes("wound") || lower.includes("finger") || userText.includes("காயம்") || userText.includes("வெட்டு")) {
-        fallbackAnswer = isTamil
-          ? "### 🌿 காயங்கள் மற்றும் வெட்டுக்காயங்களுக்கான மூலிகை சிகிச்சை\n\n#### 🛒 தேவையான பொருட்கள்\n- **மஞ்சள் தூள் / விழுது**: 1 தேக்கரண்டி\n- **கற்றாழை ஜெல்**: 1 மேஜைக்கரண்டி\n- **தேங்காய் எண்ணெய்**: 3 சொட்டுகள்\n\n#### 🥣 பயன்படுத்தும் முறை\n1. காயத்தை சுத்தமான நீரில் கழுவவும்.\n2. மஞ்சள் மற்றும் கற்றாழை ஜெல்லை கலந்து காயத்தின் மீது தடவி சுத்தமான துணியால் கட்டவும்."
-          : "### 🌿 Turmeric & Aloe Vera Antiseptic Poultice for Cuts & Wounds\n\n#### 🛒 Ingredients\n- **Turmeric Powder**: 1 teaspoon\n- **Aloe Vera Gel**: 1 tablespoon\n- **Coconut Oil**: 3 drops\n\n#### 🥣 Application\n1. Wash the cut with clean water.\n2. Apply turmeric aloe paste topically over the wound to stop bleeding and prevent bacterial infection.";
       }
 
       const errorMsg: Message = {
@@ -436,7 +436,7 @@ function ChatPage() {
 
           <input
             type="text"
-            placeholder="Ask in English or Tamil (e.g. மஞ்சளின் பயன்கள் / remedy for pimples)..."
+            placeholder="Ask in English or Tamil (e.g. காயத்துக்கு ஏதாச்சும் ரெமிடி / மஞ்சளின் பயன்கள்)..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
