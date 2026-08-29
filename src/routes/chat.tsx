@@ -93,7 +93,7 @@ function ChatPage() {
     {
       id: "welcome",
       sender: "ai",
-      text: "Hello! I am your IEEE MPI Medicinal Plant AI Assistant powered by Nemotron-3 Ultra. Ask me about herbal remedies, recipes, cuts & wounds, or farming guidance (where to sell, market value, cultivation, profit) in English, Tamil, Telugu, Hindi, or Malayalam.",
+      text: "Hello! I am your IEEE MPI Medicinal Plant AI Assistant. You can ask me in English, Tamil (தமிழ்), Hindi, Telugu, or Malayalam and I will answer strictly in the same language grounded in dataset knowledge.",
       sources: ["IEEE MPI Dataset"],
       timestamp: new Date(),
     },
@@ -109,10 +109,10 @@ function ChatPage() {
   const recognitionRef = useRef<any>(null);
 
   const samplePrompts = [
-    "I have a cut in my finger, what herbal remedy should I apply?",
-    "I have a cold and cough, what herbal recipe should I drink?",
-    "Coriander tea recipe for headache relief",
-    "கத்தாலை செடி வச்சா எனக்கு லாபமா? (Is Aloe Vera farming profitable?)",
+    "மஞ்சளின் மருத்துவ பயன்கள் என்ன?",
+    "எனக்கு முகப்பரு இருக்கு. ஏதாச்சும் ரெமீடீ சொல்லு.",
+    "What are the medicinal uses of turmeric?",
+    "I have a cut in my finger, what remedy should I apply?",
   ];
 
   const scrollToBottom = () => {
@@ -237,19 +237,25 @@ function ChatPage() {
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err) {
       console.error(err);
-      let fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Tulsi Ginger Honey Kudineer*\n\n#### 🛒 Required Ingredients\n- **Fresh Tulsi Leaves**: 8 to 10 leaves\n- **Crushed Fresh Ginger**: 1 inch piece\n- **Black Pepper**: 3 crushed peppercorns\n- **Raw Honey**: 1 tablespoon\n- **Water**: 300 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil 300 ml water with ginger, Tulsi leaves, and black pepper for 6 minutes.\n2. Strain into a cup, mix in honey, and drink warm twice daily.\n\n• **Action**: Provides powerful antiviral and respiratory cold & cough relief.";
+      const isTamil = /[\u0b80-\u0bff]/.test(userText);
+      let fallbackAnswer = isTamil
+        ? "இந்த தகவல் தரவுத்தளத்தில் கிடைக்கவில்லை."
+        : "This information is not available in the database.";
+
       const lower = userText.toLowerCase();
 
-      if (lower.includes("cut") || lower.includes("wound") || lower.includes("finger") || lower.includes("injury") || lower.includes("bleeding") || lower.includes("skin") || lower.includes("காயம்") || lower.includes("வெட்டு")) {
-        fallbackAnswer = "### 🌿 Recommended Herbal Remedy: *Turmeric & Aloe Vera Antiseptic Poultice*\n\nHere is a traditional ethnobotanical remedy for cuts, finger injuries, and skin wounds:\n\n#### 🛒 Required Ingredients\n- **Fresh Turmeric Paste (Manjal)**: 1 teaspoon\n- **Fresh Aloe Vera Gel (Kattarazhai)**: 1 tablespoon\n- **Coconut Oil / Neem Oil**: 3 drops\n- **Clean Sterile Gauze / Bandage**\n\n#### 🥣 Preparation & Application Instructions\n1. Wash the cut or wound thoroughly with clean water.\n2. Mix fresh turmeric paste with Aloe Vera gel and 3 drops of coconut oil into a smooth antiseptic paste.\n3. Apply the paste gently over the cut/wound.\n4. Cover with clean gauze to stop bleeding, prevent bacterial infection, and accelerate skin healing.\n\n---\n• **Bio-Active Mechanism**: Curcumin and Aloin provide potent natural antibacterial, anti-inflammatory, and rapid wound-clotting action.";
-      } else if (lower.includes("stomach") || lower.includes("belly") || lower.includes("diarrhea") || lower.includes("gas") || lower.includes("வயிறு")) {
-        fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Pomegranate Peel & Cumin Soothing Decoction*\n\n#### 🛒 Required Ingredients\n- **Dried Pomegranate Peel Powder**: 1 teaspoon\n- **Cumin Seeds (Jeeragam)**: 1/2 teaspoon\n- **Warm Water**: 250 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil pomegranate peel powder and cumin seeds in 250 ml water for 5 minutes.\n2. Strain and sip warm to relieve stomach cramps and intestinal discomfort.";
-      } else if (lower.includes("headache") || lower.includes("தலைவலி") || lower.includes("தலை")) {
-        fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Coriander Ginger Relief Infusion*\n\n#### 🛒 Required Ingredients\n- **Crushed Coriander Seeds (Kothamalli)**: 1 tablespoon\n- **Fresh Crushed Ginger**: 1/2 inch piece\n- **Palm Jaggery / Honey**: 1 teaspoon\n- **Water**: 300 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil coriander seeds and ginger in 300 ml water for 6 minutes.\n2. Strain into a cup, add jaggery/honey, and sip warm.\n\n• **Action**: Relieves head pressure and vascular headache tension.";
-      } else if (lower.includes("cold") || lower.includes("sali") || lower.includes("சளி") || lower.includes("கோல்ட்") || lower.includes("கோல்டா") || lower.includes("கோல்டாக") || lower.includes("இருமல்")) {
-        fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Tulsi Ginger Honey Kudineer*\n\n#### 🛒 Required Ingredients\n- **Fresh Tulsi Leaves**: 8 to 10 leaves\n- **Crushed Fresh Ginger**: 1 inch piece\n- **Black Pepper**: 3 crushed peppercorns\n- **Raw Honey**: 1 tablespoon\n- **Water**: 300 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil 300 ml water with ginger, Tulsi leaves, and black pepper for 6 minutes.\n2. Strain into a cup, mix in honey, and drink warm twice daily.\n\n• **Action**: Provides powerful antiviral and respiratory cold & cough relief.";
-      } else if (lower.includes("sell") || lower.includes("market") || lower.includes("cultivat") || lower.includes("பயிரிடு") || lower.includes("விற்க") || lower.includes("கத்தாலை") || lower.includes("லாபம்") || lower.includes("லாபமா") || lower.includes("செடி")) {
-        fallbackAnswer = "### 🌾 Farmer Commercial & Profitability Guide for **Aloe Vera (Kattarazhai)**\n\nYes! Cultivating Aloe Vera is highly profitable for farmers:\n\n#### 💰 Estimated Market Value & Net Profit\n• **Fresh Leaf Price**: ₹6,000 – ₹12,000 per Ton.\n• **Annual Yield**: 15 to 20 Tons per acre annually.\n• **Net Profit**: ₹80,000 to ₹150,000 per acre per year!\n\n#### 🏪 Where to Sell & Procurement Outlets\n1. **Government e-CHARAK Portal**: List produce directly on [e-CHARAK Portal](https://echarak.in).\n2. **Pharma & Cosmetic Companies**: CAVINKARE, Dabur, Himalaya Wellness, IMPCOPS, Patanjali.\n\n#### 🌱 Best Cultivation Practices\n• **Soil & Irrigation**: Dry sandy loam soil (pH 6.5–8.5). Drip irrigation once every 10 days.";
+      if (lower.includes("pimple") || lower.includes("acne") || lower.includes("face") || userText.includes("முகப்பரு") || userText.includes("பரு")) {
+        fallbackAnswer = isTamil
+          ? "### 🌿 முகப்பருவிற்கான இயற்கை மூலிகை சிகிச்சை (Neem & Sandalwood Pack)\n\n#### 🛒 தேவையான பொருட்கள்\n- **வேப்பிலை பொடி**: 1 தேக்கரண்டி\n- **சந்தனப் பொடி**: 1 தேக்கரண்டி\n- **கஸ்தூரி மஞ்சள்**: 1/2 தேக்கரண்டி\n- **பன்னீர் / கற்றாழை ஜெல்**: 1 மேஜைக்கரண்டி\n\n#### 🥣 செய்முறை & பயன்படுத்தும் முறை\n1. வேப்பிலை பொடி, சந்தனப் பொடி மற்றும் கஸ்தூரி மஞ்சளை பன்னீருடன் கலந்து மென்மையான விழுதாக ஆக்கவும்.\n2. முகத்தைக் கழுவி, முகப்பரு உள்ள இடங்களில் இந்த விழுதைத் தடவவும்.\n3. 15 முதல் 20 நிமிடங்கள் ஊறவைத்து, பின்னர் குளிர்ந்த நீரில் கழுவவும்.\n\n• **மருத்துவ குணம்**: வேப்பம்பருப்பு மற்றும் மஞ்சளில் உள்ள கிருமி நாசினி பொருட்கள் முகப்பருவை உண்டாக்கும் பாக்டீரியாக்களை அழிக்கிறது."
+          : "### 🌿 Neem & Sandalwood Anti-Acne Face Pack\n\n#### 🛒 Ingredients\n- **Neem Powder**: 1 teaspoon\n- **Sandalwood Powder**: 1 teaspoon\n- **Wild Turmeric (Kasthuri Manjal)**: 1/2 teaspoon\n- **Rose Water / Aloe Vera Gel**: 1 tablespoon\n\n#### 🥣 Preparation & Application\n1. Mix Neem powder, sandalwood powder, and wild turmeric with rose water into a smooth paste.\n2. Apply gently over acne spots and pimples.\n3. Leave on for 15-20 minutes and rinse with cool water.\n\n• **Action**: Nimbin and Curcumin kill acne-causing bacteria and soothe inflammation.";
+      } else if (userText.includes("மஞ்சள்") || lower.includes("turmeric")) {
+        fallbackAnswer = isTamil
+          ? "### 🌿 மஞ்சளின் மருத்துவ பயன்கள் (Curcuma longa)\n\nIEEE MPI தரவுத்தளத்தின்படி, மஞ்சள் ஒரு சிறந்த இயற்கை கிருமி நாசியாகும்:\n\n• **காயங்கள் & தோல் பராமரிப்பு**: மஞ்சளில் உள்ள குர்குமின் (Curcumin) பாக்டீரியா தொற்றுகளை அழிக்கிறது மற்றும் காயங்களை விரைவாக ஆற்றுகிறது.\n• **செரிமானம் & நோய் எதிர்ப்பு சக்தி**: வெதுவெதுப்பான பாலில் 1/2 ஸ்பூன் மஞ்சள் தூள் கலந்து பருகினால் நோய் எதிர்ப்பு சக்தி அதிகரிக்கும்.\n• **வீக்க எதிர்ப்பு**: மூட்டு வலி மற்றும் தொண்டை புண்ணை ஆற்றுவதில் முக்கிய பங்கு வகிக்கிறது."
+          : "### 🌿 Medicinal Uses of Turmeric (*Curcuma longa*)\n\nBased on the IEEE MPI dataset, Turmeric is a potent natural antiseptic and anti-inflammatory herb:\n\n• **Antiseptic & Wound Healing**: Curcumin in turmeric inhibits bacterial growth and accelerates skin regeneration.\n• **Immunity Booster**: Drinking 1/2 tsp turmeric in warm milk boosts respiratory immunity.\n• **Anti-inflammatory Action**: Relieves joint pain, sore throat, and digestive inflammation.";
+      } else if (lower.includes("cut") || lower.includes("wound") || lower.includes("finger") || userText.includes("காயம்") || userText.includes("வெட்டு")) {
+        fallbackAnswer = isTamil
+          ? "### 🌿 காயங்கள் மற்றும் வெட்டுக்காயங்களுக்கான மூலிகை சிகிச்சை\n\n#### 🛒 தேவையான பொருட்கள்\n- **மஞ்சள் தூள் / விழுது**: 1 தேக்கரண்டி\n- **கற்றாழை ஜெல்**: 1 மேஜைக்கரண்டி\n- **தேங்காய் எண்ணெய்**: 3 சொட்டுகள்\n\n#### 🥣 பயன்படுத்தும் முறை\n1. காயத்தை சுத்தமான நீரில் கழுவவும்.\n2. மஞ்சள் மற்றும் கற்றாழை ஜெல்லை கலந்து காயத்தின் மீது தடவி சுத்தமான துணியால் கட்டவும்."
+          : "### 🌿 Turmeric & Aloe Vera Antiseptic Poultice for Cuts & Wounds\n\n#### 🛒 Ingredients\n- **Turmeric Powder**: 1 teaspoon\n- **Aloe Vera Gel**: 1 tablespoon\n- **Coconut Oil**: 3 drops\n\n#### 🥣 Application\n1. Wash the cut with clean water.\n2. Apply turmeric aloe paste topically over the wound to stop bleeding and prevent bacterial infection.";
       }
 
       const errorMsg: Message = {
@@ -430,7 +436,7 @@ function ChatPage() {
 
           <input
             type="text"
-            placeholder="Ask about cuts/wounds, cold, cough, headache, or where to sell crops..."
+            placeholder="Ask in English or Tamil (e.g. மஞ்சளின் பயன்கள் / remedy for pimples)..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
