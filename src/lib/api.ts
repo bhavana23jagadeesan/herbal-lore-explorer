@@ -51,7 +51,7 @@ export function filterPlants(query: PlantQuery): Plant[] {
       compound: [...p.constituents, ...p.pharmacology].join(" "),
       region: p.regions.join(" "),
     };
-    const target = field === "all" ? Object.values(hay).join(" ") : hay[field];
+    const target = field === "all" ? Object.values(hay).join(" ") : (hay[field] ?? "");
     return target.toLowerCase().includes(q);
   });
 
@@ -164,7 +164,7 @@ export const api = {
     if (sources.length === 0) {
       text = `I could not ground that question in the MPI dataset. Try naming a plant (Tulsi, Neem, Nilavembu), a condition (fever, arthritis, asthma) or a compound (curcumin, azadirachtin).`;
     } else {
-      const s = sources[0];
+      const s = sources[0]!;
       text =
         `Based on ${sources.length} matching MPI record${sources.length > 1 ? "s" : ""}:\n\n` +
         `**${s.name}** (*${s.botanicalName}*, family ${s.family}) is documented for ${s.uses
@@ -202,7 +202,7 @@ export const api = {
     }
     await delay(1800);
     const seed = (file.name.length * 31 + Math.round(file.size / 997)) % plants.length;
-    const pick = (n: number) => plants[(seed + n) % plants.length];
+    const pick = (n: number) => plants[(seed + n) % plants.length]!;
     return {
       predictions: [
         { plant: pick(0), confidence: 0.86 + ((file.size % 90) / 1000) },
