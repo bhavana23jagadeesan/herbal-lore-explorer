@@ -29,21 +29,23 @@ async def call_openrouter_api(question: str, context_str: str) -> str:
         return ""
 
     system_prompt = (
-        "You are an expert AI Ethnopharmacology & ChatGPT-style Herbal Health Specialist for Vanaspati IEEE MPI Heritage Explorer. "
+        "You are an expert AI Ethnopharmacology & Agricultural Commercial Specialist for Vanaspati IEEE MPI Heritage Explorer. "
         "STRICT MANDATORY RESPONSE RULES:\n"
         "1. CHATGPT CONVERSATIONAL STYLE:\n"
-        "   - Respond naturally like ChatGPT in clean, helpful, friendly plain text paragraphs.\n"
-        "   - DO NOT use markdown symbols like ###, ####, **, or *.\n"
-        "   - Use clean line breaks, emojis (🌿, 🍵, 🛒, 🥣, ✨), and simple bullet points (•).\n"
-        "2. LANGUAGE MATCHING:\n"
-        "   - If the user asks in Tamil, respond ONLY in pure Tamil script (தமிழ்).\n"
+        "   - Respond naturally like ChatGPT in clean, helpful plain text paragraphs.\n"
+        "   - ABSOLUTELY NO MARKDOWN FORMATTING SYMBOLS (NO ###, NO ####, NO **, NO *).\n"
+        "   - Use clean line breaks, emojis (🌿, 🌾, 💰, 🏪, 🌱), and simple bullet points (•).\n"
+        "2. FARMER COMMERCIAL & MARKET PROFITABILITY DIRECTIVE:\n"
+        "   - When asked about market value, profit, rates, or where to sell ANY medicinal plant (e.g. Aloe Vera, Tulsi, Ashwagandha, Neem, Senna, Lemongrass, Moringa, Vetiver), provide comprehensive real-world market intelligence:\n"
+        "     • Market Price & Rates per Ton / per kg\n"
+        "     • Estimated Net Profit per Acre per Year\n"
+        "     • Where to Sell: Government e-CHARAK Portal (echarak.in), National Medicinal Plants Board (NMPB), Herbal FPOs, and direct buy-back contracts with CAVINKARE, Dabur, Himalaya Wellness, IMPCOPS, Patanjali.\n"
+        "     • Soil, spacing & irrigation cultivation tips.\n"
+        "3. LANGUAGE MATCHING:\n"
+        "   - If the user asks in Tamil (Tamil script or words), respond ONLY in pure Tamil script (தமிழ்).\n"
         "   - If the user asks in English, respond ONLY in English.\n"
         "   - If asked in Hindi, Telugu, or Malayalam, respond ONLY in that exact script.\n"
-        "3. GROUNDED HEALTH & FARMING ANSWERS:\n"
-        "   - Provide accurate traditional herbal remedies for cold, cough, constipation, knee pain, pimples, cuts, wounds, headache, fever, stomach ache, hair fall, toothache, and farming queries.\n"
-        "   - If the topic is not found in dataset or health scope, respond ONLY with:\n"
-        "     Tamil: 'இந்த தகவல் தரவுத்தளத்தில் கிடைக்கவில்லை.'\n"
-        "     English: 'This information is not available in the database.'"
+        "4. HEALTH REMEDIES: Provide clear remedies for cold, cough, constipation, knee pain, pimples, cuts, wounds, headache, fever, stomach ache, hair fall, toothache."
     )
 
     user_prompt = f"IEEE MPI Dataset Context:\n{context_str}\n\nUser Question: {question}"
@@ -103,14 +105,51 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
         if api_ans:
             return {
                 "answer": api_ans,
-                "sources": sources if sources else ["IEEE MPI Dataset"]
+                "sources": sources if sources else ["IEEE MPI Dataset", "National Medicinal Plants Board (NMPB)"]
             }
     except Exception as e:
         print(f"OpenRouter LLM timeout fallback: {e}")
 
-    # Comprehensive ChatGPT Fallback Engine (No Markdown Symbols)
+    # 1. Farmer Cultivation, Market Value & Profitability Queries for ANY Plant
+    if any(w in q_lower or w in question for w in ["sell", "market", "cultivat", "farming", "profit", "rate", "price", "income", "விவசாயி", "விற்க", "சந்தை", "பயிரிட", "லாப", "வருமானம்"]):
+        crop = context_plants[0]['name'] if context_plants else "Aloe Vera (Kattarazhai) / Tulsi / Ashwagandha"
+        bot_name = context_plants[0]['botanical_name'] if context_plants else "Aloe barbadensis miller"
 
-    # 1. Cuts, Wounds & Bleeding (காயத்துக்கு / காயத்திற்கு / காயம் / வெட்டு / இரத்தம் / cut / wound / injury)
+        if in_tamil:
+            ans = (
+                f"🌾 {crop} பயிரிடுதல், சந்தை விலை மற்றும் விவசாயி லாப வழிகாட்டி\n\n"
+                f"ஆம்! {crop} பயிரிடுவது விவசாயிகளுக்கு மிக அதிக வணிக லாபம் தரும் பயிராகும்.\n\n"
+                f"💰 சந்தை விலை மற்றும் வருமான மதிப்பீடு:\n"
+                f"• புதிய இலைகள் / மூலிகை சந்தை விலை: டன் ஒன்றுக்கு ₹6,000 முதல் ₹15,000 வரை.\n"
+                f"• உலர் பொடி / சாறு விலை: கிலோ ஒன்றுக்கு ₹180 முதல் ₹450 வரை.\n"
+                f"• வருடாந்திர மகசூல்: ஏக்கருக்கு 15 முதல் 20 டன்கள்.\n"
+                f"• நிகர வருடாந்திர லாபம்: ஏக்கருக்கு ₹80,000 முதல் ₹1,50,000 வரை குறைந்த பராமரிப்பு செலவில் ஈட்டலாம்.\n\n"
+                f"🏪 விற்பனை செய்யும் இடங்கள் மற்றும் நேரடி கொள்முதல்:\n"
+                f"1. மத்திய அரசு e-CHARAK போர்டல்: echarak.in போர்டலில் விவசாயிகள் நேரடியாக தங்கள் மூலிகைகளை பதிவு செய்து நாடு முழுவதும் விற்கலாம்.\n"
+                f"2. சித்தா & ஆயுர்வேத மருந்து நிறுவனங்கள்: CAVINKARE, டாபர், இமாலயா, IMPCOPS மற்றும் பதாஞ்சலி நிறுவனங்களின் நேரடி கொள்முதல் ஒப்பந்தங்கள்.\n"
+                f"3. மூலிகை விவசாய உற்பத்தியாளர் அமைப்புகள் (Herbal FPOs) மற்றும் மாவட்ட ஏபிஎம்சி சந்தைகள்.\n\n"
+                f"🌱 பயிரிடும் முறைகள்:\n"
+                f"• மண் மற்றும் பாசனம்: வடிகால் வசதியுள்ள மணல் கலந்த நிலம் (pH 6.5-8.5). 10 நாட்களுக்கு ஒருமுறை சொட்டு நீர் பாசனம் போதுமானது."
+            )
+        else:
+            ans = (
+                f"🌾 Commercial Market Value & Profitability Guide for {crop} ({bot_name})\n\n"
+                f"Yes, cultivating {crop} is highly profitable for farmers with strong commercial returns.\n\n"
+                f"💰 Estimated Market Value & Rates:\n"
+                f"• Fresh Crop Market Price: ₹6,000 to ₹15,000 per Ton.\n"
+                f"• Dry Extract / Powder Price: ₹180 to ₹450 per kg.\n"
+                f"• Annual Yield: 15 to 20 Tons per acre annually.\n"
+                f"• Estimated Net Profit: ₹80,000 to ₹150,000 per acre per year with minimal maintenance.\n\n"
+                f"🏪 Where to Sell & Direct Buy-Back Procurement Outlets:\n"
+                f"1. Government e-CHARAK Portal: List produce directly on echarak.in (National Medicinal Plants Board).\n"
+                f"2. Direct Buy-Back Contracts: CAVINKARE, Dabur, Himalaya Wellness, IMPCOPS, and Patanjali.\n"
+                f"3. Regional Farmer Producer Organizations (FPOs) and APMC Herbal Mandis.\n\n"
+                f"🌱 Cultivation Tips:\n"
+                f"• Soil & Irrigation: Well-drained sandy loam soil with pH 6.5–8.5. Minimal drip irrigation once every 10 days."
+            )
+        return {"answer": clean_markdown(ans), "sources": ["IEEE MPI Dataset", "National Medicinal Plants Board (NMPB)", "e-CHARAK Portal"]}
+
+    # 2. Cuts, Wounds & Bleeding (காயத்துக்கு / காயத்திற்கு / காயம் / வெட்டு / இரத்தம் / cut / wound / injury)
     if any(w in q_lower or w in question for w in ["cut", "wound", "injury", "finger", "bleeding", "காய", "வெட்டு", "இரத்த"]):
         if in_tamil:
             ans = (
@@ -142,7 +181,7 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             )
         return {"answer": clean_markdown(ans), "sources": ["IEEE MPI Dataset"]}
 
-    # 2. Constipation (மலச்சிக்கல் / மலக்கட்டு / constipation)
+    # 3. Constipation (மலச்சிக்கல் / மலக்கட்டு / constipation)
     if any(w in q_lower or w in question for w in ["constipation", "malakattu", "மலச்சிக்கல்", "மல"]):
         if in_tamil:
             ans = (
@@ -172,7 +211,7 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             )
         return {"answer": clean_markdown(ans), "sources": ["IEEE MPI Dataset"]}
 
-    # 3. Knee & Joint Pain / Arthritis (மூட்டு வலி / முழங்கால் வலி / knee / joint / arthritis)
+    # 4. Knee & Joint Pain / Arthritis (மூட்டு வலி / முழங்கால் வலி / knee / joint / arthritis)
     if any(w in q_lower or w in question for w in ["knee", "joint", "arthritis", "மூட்டு", "முழங்கால்"]):
         if in_tamil:
             ans = (
@@ -200,7 +239,7 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             )
         return {"answer": clean_markdown(ans), "sources": ["IEEE MPI Dataset"]}
 
-    # 4. Pimples & Acne (முகப்பரு / பரு / pimple / acne / spots)
+    # 5. Pimples & Acne (முகப்பரு / பரு / pimple / acne / spots)
     if any(w in q_lower or w in question for w in ["pimple", "acne", "face", "spots", "முகப்பரு", "பரு"]):
         if in_tamil:
             ans = (
@@ -230,7 +269,7 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             )
         return {"answer": clean_markdown(ans), "sources": ["IEEE MPI Dataset"]}
 
-    # 5. Cold & Cough (சளி / இருமல் / கோல்ட் / cold / cough)
+    # 6. Cold & Cough (சளி / இருமல் / கோல்ட் / cold / cough)
     if any(w in q_lower or w in question for w in ["cold", "cough", "சளி", "இருமல", "இருமல்", "கோல்ட"]):
         if in_tamil:
             ans = (
@@ -261,7 +300,7 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             )
         return {"answer": clean_markdown(ans), "sources": ["IEEE MPI Dataset"]}
 
-    # 6. Turmeric (மஞ்சள் / மஞ்சளின் / turmeric)
+    # 7. Turmeric (மஞ்சள் / மஞ்சளின் / turmeric)
     if "மஞ்சள" in question or "மஞ்சள்" in question or "turmeric" in q_lower:
         if in_tamil:
             ans = (
@@ -280,30 +319,6 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
                 "• Anti-inflammatory Action: Relieves joint pain, sore throat, and digestive inflammation."
             )
         return {"answer": clean_markdown(ans), "sources": sources if sources else ["IEEE MPI Dataset"]}
-
-    # 7. Farmer Cultivation & Market Price Queries
-    if any(w in q_lower or w in question for w in ["sell", "market", "cultivat", "farming", "profit", "விவசாயி", "விற்க", "சந்தை", "பயிரிட", "லாப"]):
-        if in_tamil:
-            ans = (
-                "🌾 மூலிகை பயிரிடுதல் மற்றும் வணிக சந்தை வாய்ப்பு வழிகாட்டி\n\n"
-                "💰 சந்தை விலை மற்றும் வருமானம்:\n"
-                "• கற்றாழை / துளசி சந்தை விலை: டன் ஒன்றுக்கு ₹6,000 முதல் ₹12,000 வரை.\n"
-                "• வருடாந்திர நிகர லாபம்: ஏக்கருக்கு ₹80,000 முதல் ₹1,50,000 வரை.\n\n"
-                "🏪 விற்பனை செய்யும் இடங்கள்:\n"
-                "1. அரசு e-CHARAK போர்டல்: echarak.in போர்டலில் நேரடியாக பதிவு செய்து விற்கலாம்.\n"
-                "2. சித்தா & ஆயுர்வேத நிறுவனங்கள்: IMPCOPS, டாபர், இமாலயா மற்றும் பதாஞ்சலி நேரடி கொள்முதல்."
-            )
-        else:
-            ans = (
-                "🌾 Farmer Commercial & Market Value Guide\n\n"
-                "💰 Market Price & Profitability:\n"
-                "• Fresh Leaf Market Price: ₹6,000 – ₹12,000 per Ton.\n"
-                "• Estimated Net Profit: ₹80,000 to ₹150,000 per acre annually.\n\n"
-                "🏪 Where to Sell Outlets:\n"
-                "1. Government e-CHARAK Portal: Register produce on echarak.in.\n"
-                "2. Direct Buy-Back Contracts: IMPCOPS, Dabur, Himalaya Wellness, Patanjali."
-            )
-        return {"answer": clean_markdown(ans), "sources": ["IEEE MPI Dataset", "National Medicinal Plants Board (NMPB)"]}
 
     # 8. Check direct plant matches in context_plants
     if context_plants and any(p['name'].lower() in q_lower or p['botanical_name'].lower() in q_lower for p in context_plants):
