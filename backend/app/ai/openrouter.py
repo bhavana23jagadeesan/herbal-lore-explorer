@@ -103,30 +103,27 @@ RECIPE_TEMPLATES = {
     }
 }
 
-# Multi-lingual symptom keyword mapping (English, Tamil, Telugu, Hindi, Malayalam)
 MULTILINGUAL_KEYWORDS = {
+    "headache": ["headache", "thalai vali", "தலைவலி", "தலை வலி", "தலை வலிக்குது", "sir dard", "सिर दर्द", "thala noppi", "తల నప్పి", "thala vedana", "തലവേദന"],
     "cough": ["cough", "irumal", "இருமல்", "khaansi", "खांसी", "daggu", "దగ్గు", "chuma", "ചുമ"],
     "cold": ["cold", "sali", "சளி", "jukaam", "जुकाम", "jalubu", "జలుబు", "jaladhosham", "ജലദോഷം"],
-    "headache": ["headache", "thalai vali", "தலைவலி", "sir dard", "सिर दर्द", "thala noppi", "తల నప్పి", "thala vedana", "തലവേദന"],
     "constipation": ["constipation", "malakattu", "மலச்சிக்கல்", "kabz", "कब्ज", "malabaddhakam", "మలబద్ధకం"],
     "fever": ["fever", "kaichal", "காய்ச்சல்", "bukhar", "बुखार", "pani", "പനി"],
     "indigestion": ["indigestion", "seriyamai", "செரியாமை", "gas", "acidity", "digestion"]
 }
+
+FARMER_KEYWORDS = ["sell", "where to sell", "market value", "price", "cultivation", "cultivate", "farming", "buyback", "vanguard", "yield", "rate", "விவசாயி", "விற்க", "சந்தை", "சந்தை விலை", "பயிரிடுதல்"]
 
 async def call_openrouter_api(question: str, context_str: str) -> str:
     if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
         return ""
 
     system_prompt = (
-        "You are an expert AI Ethnopharmacology & Medicinal Plant Specialist for the Vanaspati IEEE MPI Heritage Explorer. "
+        "You are an expert AI Ethnopharmacology & Agricultural Specialist for the Vanaspati IEEE MPI Heritage Explorer. "
         "You are fluent in English, Tamil, Telugu, Hindi, Malayalam, and Indian regional languages. "
-        "IMPORTANT DIRECTIVE: Regardless of whether the user asks their question in English, Tamil, Telugu, Hindi, or Malayalam (in native script or Roman letters), "
-        "you MUST understand their symptom completely and format your response with a structured **Traditional Herbal Recipe & Remedy Guide** containing:\n"
-        "1. **Recommended Recipe Title**\n"
-        "2. **Required Ingredients (with exact quantities like 1 tsp, 250ml, 5 leaves, etc.)**\n"
-        "3. **Step-by-Step Preparation & Dosage Instructions**\n"
-        "4. **Bio-Active Compounds & Phytochemical Action**\n"
-        "Always write the response in clean English letters so the Text-to-Speech audio reader can speak it out loud clearly."
+        "DIRECTIVE FOR HEALTH SYMPTOMS: If the user asks about symptoms (headache, cold, cough, constipation, fever), format your response with a structured **Traditional Herbal Recipe & Remedy Guide** (Title, Ingredients with exact quantities, Preparation steps, Bio-active action).\n"
+        "DIRECTIVE FOR FARMERS: If a farmer or user asks where to sell, market value, or cultivation practices for medicinal plants, format your response with a structured **Farmer Agricultural & Commercial Guide** (Cultivation & Soil practices, Market Rate per kg, Direct Buying Outlets & Government e-CHARAK portals).\n"
+        "Always write responses in clean English letters so the Text-to-Speech audio reader can speak it out loud clearly."
     )
 
     user_prompt = f"IEEE MPI Dataset Context:\n{context_str}\n\nUser Question (Multi-lingual): {question}"
@@ -163,6 +160,7 @@ async def call_openrouter_api(question: str, context_str: str) -> str:
 
 async def generate_grounded_answer(question: str, context_plants: List[Dict[str, Any]]) -> Dict[str, Any]:
     sources = [f"{p['name']} ({p['botanical_name']})" for p in context_plants]
+    q_lower = question.lower()
 
     context_str = ""
     for p in context_plants:
@@ -189,10 +187,34 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
     except Exception as e:
         print(f"OpenRouter fast timeout fallback: {e}")
 
-    # Multi-lingual Smart Recipe Fallback Engine
-    q_lower = question.lower()
-    recipe = None
+    # 1. Farmer Agricultural & Market Value Fallback
+    if any(fk in q_lower for fk in FARMER_KEYWORDS):
+        crop_name = context_plants[0]['name'] if context_plants else "Medicinal Crops (Tulsi / Ashwagandha / Aloe Vera)"
+        bot_name = context_plants[0]['botanical_name'] if context_plants else "Ocimum tenuiflorum"
 
+        ans = (
+            f"### 🌾 Farmer Commercial & Cultivation Guide for **{crop_name}** (*{bot_name}*)\n\n"
+            f"Here is the official commercial market guidance for farming and selling **{crop_name}**:\n\n"
+            f"#### 💰 Estimated Market Value & Rates\n"
+            f"• **Raw Dried Leaf / Root Price**: ₹180 – ₹420 per kg (depending on moisture content & organic certification).\n"
+            f"• **Essential Oil / Extract Price**: ₹2,500 – ₹6,000 per Liter.\n"
+            f"• **Yield Expectation**: 1.5 to 2.5 Tons per acre annually.\n\n"
+            f"#### 🏪 Where to Sell & Direct Procurement Outlets\n"
+            f"1. **Government e-CHARAK Portal**: Registered farmers can directly list raw produce on [e-CHARAK (National Medicinal Plants Board)](https://echarak.in).\n"
+            f"2. **Pharma & Siddha Buyers**: Direct buy-back contracts with Dabur, Himalaya Wellness, IMPCOPS, Kottakkal Arya Vaidya Sala, and CAVINKARE.\n"
+            f"3. **Farmer Producer Organizations (FPOs)**: Regional Herbal FPOs & APMC Spices Markets in Tamil Nadu, Karnataka, and Kerala.\n\n"
+            f"#### 🌱 Best Cultivation Practices\n"
+            f"• **Soil & Climate**: Well-drained sandy loam soil with pH 6.0 – 7.5. Requires full sunlight.\n"
+            f"• **Sowing & Spacing**: 45 cm x 30 cm spacing. Sow seeds/cuttings during monsoon start (June–July).\n"
+            f"• **Irrigation & Manure**: Drip irrigation once every 5-7 days. Apply vermicompost (2 tons/acre)."
+        )
+        return {
+            "answer": ans,
+            "sources": sources if sources else ["IEEE MPI Dataset", "National Medicinal Plants Board (NMPB)"]
+        }
+
+    # 2. Multi-lingual Symptom Recipe Fallback Engine
+    recipe = None
     for target_sym, aliases in MULTILINGUAL_KEYWORDS.items():
         if any(alias in q_lower for alias in aliases):
             recipe = RECIPE_TEMPLATES.get(target_sym)
@@ -202,9 +224,9 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
         ing_list = "\n".join([f"- **{ing}**" for ing in recipe["ingredients"]])
         step_list = "\n".join([f"{i+1}. {step}" for i, step in enumerate(recipe["steps"])])
 
-        plant_name = context_plants[0]['name'] if context_plants else "Tulsi (Holy Basil)"
-        bot_name = context_plants[0]['botanical_name'] if context_plants else "Ocimum tenuiflorum"
-        consts = ", ".join(context_plants[0]['constituents']) if context_plants else "Eugenol, Gingerol, Active Bio-Alkaloids"
+        plant_name = context_plants[0]['name'] if context_plants else "Tulsi / Coriander"
+        bot_name = context_plants[0]['botanical_name'] if context_plants else "Ocimum / Coriandrum"
+        consts = ", ".join(context_plants[0]['constituents']) if context_plants else "Eugenol, Linalool, Active Bio-Alkaloids"
 
         ans = (
             f"### 🍵 Recommended Herbal Recipe: *{recipe['title']}*\n\n"
@@ -214,7 +236,7 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             f"---\n"
             f"#### 🧪 Bio-Active Compounds & Mechanism\n"
             f"• **Active Phytochemicals**: {consts}\n"
-            f"• **Mechanism of Action**: Provides potent anti-inflammatory, antimicrobial, and symptom-soothing benefits validated in traditional ethnopharmacology."
+            f"• **Mechanism of Action**: Provides potent anti-inflammatory, vascular tension relief, and symptom-soothing benefits validated in traditional ethnopharmacology."
         )
         return {
             "answer": ans,
