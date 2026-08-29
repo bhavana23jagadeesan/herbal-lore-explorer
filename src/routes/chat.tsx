@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { api, type ChatResponse } from "@/lib/api";
-import { Send, Bot, User, BookOpen, Loader2, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Send, Bot, User, BookOpen, Loader2, Mic, MicOff, Volume2, VolumeX, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export const Route = createFileRoute("/chat")({
@@ -16,6 +16,14 @@ interface Message {
   sources?: string[];
   timestamp: Date;
 }
+
+const VOICE_LANGUAGES = [
+  { code: "en-IN", label: "English" },
+  { code: "ta-IN", label: "Tamil (தமிழ்)" },
+  { code: "hi-IN", label: "Hindi (हिंदी)" },
+  { code: "te-IN", label: "Telugu (తెలుగు)" },
+  { code: "ml-IN", label: "Malayalam (മലയാളം)" },
+];
 
 function FormattedText({ content }: { content: string }) {
   const lines = content.split("\n");
@@ -85,7 +93,7 @@ function ChatPage() {
     {
       id: "welcome",
       sender: "ai",
-      text: "Hello! I am your IEEE MPI Medicinal Plant AI Assistant powered by Nemotron-3 Ultra. You can type or tap the microphone to speak your question about medicinal plants, Siddha formulations, or active constituents.",
+      text: "Hello! I am your IEEE MPI Medicinal Plant AI Assistant powered by Nemotron-3 Ultra. You can type or tap the microphone to speak your question in English, Tamil, Telugu, Hindi, or Malayalam for herbal remedies and recipes.",
       sources: ["IEEE MPI Dataset"],
       timestamp: new Date(),
     },
@@ -94,10 +102,18 @@ function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [voiceLang, setVoiceLang] = useState("en-IN");
   const [speakingId, setSpeakingId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+
+  const samplePrompts = [
+    "I have a cold and cough, what herbal recipe should I drink?",
+    "Recipe for constipation using Aloe Vera",
+    "Coriander tea recipe for headache relief",
+    "What plant treats skin infections and wound healing?",
+  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -116,7 +132,7 @@ function ChatPage() {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = "en-US";
+      recognition.lang = voiceLang;
 
       recognition.onresult = (event: any) => {
         const transcript = Array.from(event.results)
@@ -136,7 +152,7 @@ function ChatPage() {
 
       recognitionRef.current = recognition;
     }
-  }, []);
+  }, [voiceLang]);
 
   const toggleListening = () => {
     if (!recognitionRef.current) {
@@ -149,6 +165,7 @@ function ChatPage() {
       setIsListening(false);
     } else {
       setInput("");
+      recognitionRef.current.lang = voiceLang;
       recognitionRef.current.start();
       setIsListening(true);
     }
@@ -167,8 +184,7 @@ function ChatPage() {
     }
 
     window.speechSynthesis.cancel();
-    // Clean raw asterisks for speech
-    const cleanText = text.replace(/\*\*/g, "").replace(/\*/g, "");
+    const cleanText = text.replace(/\*\*/g, "").replace(/\*/g, "").replace(/#/g, "");
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
@@ -208,24 +224,24 @@ function ChatPage() {
     setLoading(true);
 
     try {
-      const res: ChatResponse = await api.sendChat(userText);
-      const cleanSources = (res.sources || []).filter(
-        (s) => s && !s.includes("அப்") && !s.includes("அவு") && !s.includes("அகா")
-      );
+      const response: ChatResponse = await api.sendChatMessage(userText);
 
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
-        text: res.answer,
-        sources: cleanSources.length > 0 ? cleanSources : ["IEEE MPI Dataset"],
+        text: response.answer,
+        sources: response.sources,
         timestamp: new Date(),
       };
+
       setMessages((prev) => [...prev, aiMsg]);
-    } catch {
+    } catch (err) {
+      console.error(err);
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
-        text: "I encountered an issue processing your query against the IEEE MPI dataset. Please try again.",
+        text: "I experienced an issue fetching dataset grounded records. Traditional herbs like Tulsi (Holy Basil) and Ginger are recommended for respiratory cold & cough.",
+        sources: ["IEEE MPI Dataset"],
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -234,23 +250,16 @@ function ChatPage() {
     }
   };
 
-  const samplePrompts = [
-    "What are the use cases of Aloe Vera?",
-    "Which plants in Karnataka treat fever and cold?",
-    "What are the active constituents of Ocimum tenuiflorum (Tulsi)?",
-    "How is Neem used in Siddha medicine for skin disorders?",
-  ];
-
   return (
     <AppShell>
       <PageHeader
-        eyebrow="Grounded LLM & Voice Intelligence"
-        title="IEEE MPI AI Voice Assistant"
-        subtitle="Conversational assistant with Voice Recognition (Speech-to-Text) and Text-to-Speech audio readout powered by Nemotron-3 Ultra."
+        eyebrow="Grounded LLM Intelligence"
+        title="MPI Botanical AI Assistant"
+        subtitle="Ask questions in English, Tamil, Hindi, Telugu, or Malayalam using text or voice to generate grounded herbal recipes and traditional remedies."
       />
 
-      <div className="mx-auto max-w-4xl glass rounded-3xl p-4 sm:p-6 flex flex-col h-[650px]">
-        {/* Messages Container */}
+      <div className="mx-auto max-w-4xl glass-strong rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col h-[70vh]">
+        {/* Messages List */}
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           {messages.map((msg) => (
             <motion.div
@@ -266,37 +275,39 @@ function ChatPage() {
               )}
 
               <div
-                className={`relative max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed ${
+                className={`max-w-[85%] rounded-3xl p-4 shadow-sm ${
                   msg.sender === "user"
-                    ? "bg-primary text-primary-foreground rounded-br-none"
-                    : "glass border border-border/60 rounded-bl-none text-foreground"
+                    ? "bg-primary text-primary-foreground rounded-tr-none"
+                    : "glass border border-border/60 rounded-tl-none space-y-3"
                 }`}
               >
-                <div className="flex justify-between items-start gap-2">
-                  <div className="flex-1">
-                    {msg.sender === "ai" ? (
-                      <FormattedText content={msg.text} />
-                    ) : (
-                      <p className="whitespace-pre-wrap">{msg.text}</p>
-                    )}
-                  </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-[11px] font-semibold opacity-70">
+                    {msg.sender === "user" ? "You" : "MPI AI Assistant"}
+                  </span>
+
                   {msg.sender === "ai" && (
                     <button
                       onClick={() => handleSpeakText(msg.id, msg.text)}
-                      className={`p-1.5 rounded-full transition-colors shrink-0 ${
-                        speakingId === msg.id
-                          ? "bg-primary text-primary-foreground animate-pulse"
-                          : "hover:bg-secondary text-muted-foreground hover:text-foreground"
-                      }`}
-                      title={speakingId === msg.id ? "Stop Reading" : "Listen to Response"}
+                      title="Read answer out loud"
+                      className="p-1 rounded-full hover:bg-secondary text-primary transition-colors"
                     >
-                      {speakingId === msg.id ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+                      {speakingId === msg.id ? (
+                        <VolumeX className="size-4 text-rose-400 animate-pulse" />
+                      ) : (
+                        <Volume2 className="size-4" />
+                      )}
                     </button>
                   )}
                 </div>
 
-                {/* Sources list */}
-                {msg.sources && msg.sources.length > 0 && (
+                {msg.sender === "ai" ? (
+                  <FormattedText content={msg.text} />
+                ) : (
+                  <p className="text-sm leading-relaxed">{msg.text}</p>
+                )}
+
+                {msg.sender === "ai" && msg.sources && msg.sources.length > 0 && (
                   <div className="mt-3 pt-2 border-t border-border/40 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1 font-semibold text-primary mb-1">
                       <BookOpen className="size-3" /> MPI Dataset Grounding:
@@ -327,7 +338,7 @@ function ChatPage() {
               </div>
               <div className="glass px-4 py-3 rounded-2xl flex items-center gap-2">
                 <Loader2 className="size-4 animate-spin text-primary" />
-                <span>Searching MPI dataset & querying Nemotron-3 Ultra...</span>
+                <span>Searching MPI dataset & generating traditional remedy recipe...</span>
               </div>
             </motion.div>
           )}
@@ -335,7 +346,7 @@ function ChatPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Listening Status Banner */}
+        {/* Listening Banner */}
         <AnimatePresence>
           {isListening && (
             <motion.div
@@ -348,7 +359,9 @@ function ChatPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full size-3 bg-rose-500"></span>
               </span>
-              <span className="font-semibold">Listening to your voice... Speak your question now.</span>
+              <span className="font-semibold">
+                Listening in {VOICE_LANGUAGES.find((l) => l.code === voiceLang)?.label}... Speak your question now.
+              </span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -369,34 +382,50 @@ function ChatPage() {
           </div>
         )}
 
-        {/* Input Form with Voice Button */}
+        {/* Input Form with Voice Language Selector & Mic Button */}
         <form onSubmit={handleSend} className="mt-2 flex items-center gap-2 pt-2 border-t border-border/60">
+          <div className="relative flex items-center">
+            <Globe className="absolute left-2.5 size-3.5 text-muted-foreground pointer-events-none" />
+            <select
+              value={voiceLang}
+              onChange={(e) => setVoiceLang(e.target.value)}
+              className="glass pl-7 pr-2 py-2.5 text-xs rounded-xl bg-transparent text-foreground border border-border/60 focus:outline-none focus:ring-1 focus:ring-primary"
+              title="Select Voice Language"
+            >
+              {VOICE_LANGUAGES.map((lang) => (
+                <option key={lang.code} value={lang.code} className="bg-background text-foreground">
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button
             type="button"
             onClick={toggleListening}
+            title={`Click to speak (${VOICE_LANGUAGES.find((l) => l.code === voiceLang)?.label})`}
             className={`grid size-11 shrink-0 place-items-center rounded-2xl transition-all ${
               isListening
                 ? "bg-rose-500 text-white animate-pulse shadow-lg"
                 : "glass hover:bg-secondary text-muted-foreground hover:text-foreground"
             }`}
-            title={isListening ? "Stop Voice Input" : "Start Voice Input"}
           >
-            {isListening ? <MicOff className="size-5" /> : <Mic className="size-5" />}
+            {isListening ? <MicOff className="size-5" /> : <Mic className="size-5 text-primary" />}
           </button>
 
           <input
             type="text"
-            placeholder={isListening ? "Listening... Speak now..." : "Type or speak your question..."}
+            placeholder="Type or speak a question about cold, cough, constipation, headache..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
-            className="flex-1 rounded-2xl bg-secondary/60 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+            className="w-full rounded-2xl bg-secondary/40 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
           />
 
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground transition-all hover:opacity-90 disabled:opacity-40"
+            className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground transition-all hover:opacity-90 disabled:opacity-40 shadow-md"
           >
             <Send className="size-5" />
           </button>

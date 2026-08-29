@@ -103,22 +103,33 @@ RECIPE_TEMPLATES = {
     }
 }
 
+# Multi-lingual symptom keyword mapping (English, Tamil, Telugu, Hindi, Malayalam)
+MULTILINGUAL_KEYWORDS = {
+    "cough": ["cough", "irumal", "இருமல்", "khaansi", "खांसी", "daggu", "దగ్గు", "chuma", "ചുമ"],
+    "cold": ["cold", "sali", "சளி", "jukaam", "जुकाम", "jalubu", "జలుబు", "jaladhosham", "ജലദോഷം"],
+    "headache": ["headache", "thalai vali", "தலைவலி", "sir dard", "सिर दर्द", "thala noppi", "తల నప్పి", "thala vedana", "തലവേദന"],
+    "constipation": ["constipation", "malakattu", "மலச்சிக்கல்", "kabz", "कब्ज", "malabaddhakam", "మలబద్ధకం"],
+    "fever": ["fever", "kaichal", "காய்ச்சல்", "bukhar", "बुखार", "pani", "പനി"],
+    "indigestion": ["indigestion", "seriyamai", "செரியாமை", "gas", "acidity", "digestion"]
+}
+
 async def call_openrouter_api(question: str, context_str: str) -> str:
     if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
         return ""
 
     system_prompt = (
-        "You are an expert AI Medicinal Plant & Ethnopharmacology Specialist for the Vanaspati IEEE MPI Heritage Explorer. "
-        "IMPORTANT DIRECTIVE: Whenever the user mentions any health condition, symptom, or ailment (e.g. cold, cough, constipation, headache, fever, indigestion, skin issues, etc.), "
-        "ALWAYS format your answer with a structured **Traditional Herbal Recipe & Remedy Guide** containing:\n"
+        "You are an expert AI Ethnopharmacology & Medicinal Plant Specialist for the Vanaspati IEEE MPI Heritage Explorer. "
+        "You are fluent in English, Tamil, Telugu, Hindi, Malayalam, and Indian regional languages. "
+        "IMPORTANT DIRECTIVE: Regardless of whether the user asks their question in English, Tamil, Telugu, Hindi, or Malayalam (in native script or Roman letters), "
+        "you MUST understand their symptom completely and format your response with a structured **Traditional Herbal Recipe & Remedy Guide** containing:\n"
         "1. **Recommended Recipe Title**\n"
         "2. **Required Ingredients (with exact quantities like 1 tsp, 250ml, 5 leaves, etc.)**\n"
         "3. **Step-by-Step Preparation & Dosage Instructions**\n"
         "4. **Bio-Active Compounds & Phytochemical Action**\n"
-        "Do NOT output raw Tamil script characters. Always use clean English letters."
+        "Always write the response in clean English letters so the Text-to-Speech audio reader can speak it out loud clearly."
     )
 
-    user_prompt = f"IEEE MPI Dataset Context:\n{context_str}\n\nUser Question: {question}"
+    user_prompt = f"IEEE MPI Dataset Context:\n{context_str}\n\nUser Question (Multi-lingual): {question}"
 
     payload = {
         "model": OPENROUTER_MODEL,
@@ -178,21 +189,22 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
     except Exception as e:
         print(f"OpenRouter fast timeout fallback: {e}")
 
-    # Smart Recipe Fallback Engine
+    # Multi-lingual Smart Recipe Fallback Engine
     q_lower = question.lower()
     recipe = None
-    for kw in RECIPE_TEMPLATES:
-        if kw in q_lower:
-            recipe = RECIPE_TEMPLATES[kw]
+
+    for target_sym, aliases in MULTILINGUAL_KEYWORDS.items():
+        if any(alias in q_lower for alias in aliases):
+            recipe = RECIPE_TEMPLATES.get(target_sym)
             break
 
     if recipe:
         ing_list = "\n".join([f"- **{ing}**" for ing in recipe["ingredients"]])
         step_list = "\n".join([f"{i+1}. {step}" for i, step in enumerate(recipe["steps"])])
 
-        plant_name = context_plants[0]['name'] if context_plants else "Tulsi / Ginger"
+        plant_name = context_plants[0]['name'] if context_plants else "Tulsi (Holy Basil)"
         bot_name = context_plants[0]['botanical_name'] if context_plants else "Ocimum tenuiflorum"
-        consts = ", ".join(context_plants[0]['constituents']) if context_plants else "Eugenol, Gingerol, Active Alkaloids"
+        consts = ", ".join(context_plants[0]['constituents']) if context_plants else "Eugenol, Gingerol, Active Bio-Alkaloids"
 
         ans = (
             f"### 🍵 Recommended Herbal Recipe: *{recipe['title']}*\n\n"
