@@ -104,11 +104,11 @@ RECIPE_TEMPLATES = {
 }
 
 MULTILINGUAL_KEYWORDS = {
-    "headache": ["headache", "thalai vali", "தலைவலி", "தலை வலி", "தலை வலிக்குது", "sir dard", "सिर दर्द", "thala noppi", "తల నప్పి", "thala vedana", "തലവേദന"],
-    "cough": ["cough", "irumal", "இருமல்", "khaansi", "खांसी", "daggu", "దగ్గు", "chuma", "ചുമ"],
-    "cold": ["cold", "sali", "சளி", "jukaam", "जुकाम", "jalubu", "జలుబు", "jaladhosham", "ജലദോഷം"],
+    "cold": ["cold", "colds", "coldag", "sali", "சளி", "கோல்ட்", "கோல்டா", "கோல்டாக", "கோல்டு", "jukaam", "जुकाम", "jalubu", "జలుబు", "jaladhosham", "ജനദോഷം"],
+    "cough": ["cough", "coughs", "irumal", "இருமல்", "இருமலாக", "khaansi", "खांसी", "daggu", "దగ్గు", "chuma", "ചുമ"],
+    "headache": ["headache", "headaches", "thalai vali", "தலைவலி", "தலை வலி", "தலை வலிக்குது", "தலைவலியாக", "sir dard", "सिर दर्द", "thala noppi", "తల నప్పి", "thala vedana", "തലവേദന"],
+    "fever": ["fever", "fevers", "kaichal", "காய்ச்சல்", "காய்ச்சலாக", "bukhar", "बुखार", "pani", "പനി"],
     "constipation": ["constipation", "malakattu", "மலச்சிக்கல்", "kabz", "कब्ज", "malabaddhakam", "మలబద్ధకం"],
-    "fever": ["fever", "kaichal", "காய்ச்சல்", "bukhar", "बुखार", "pani", "പനി"],
     "indigestion": ["indigestion", "seriyamai", "செரியாமை", "gas", "acidity", "digestion"]
 }
 
@@ -124,8 +124,8 @@ async def call_openrouter_api(question: str, context_str: str) -> str:
     system_prompt = (
         "You are an expert AI Ethnopharmacology & Agricultural Specialist for the Vanaspati IEEE MPI Heritage Explorer. "
         "You are fluent in English, Tamil, Telugu, Hindi, Malayalam, and Indian regional languages. "
-        "DIRECTIVE FOR HEALTH SYMPTOMS: If the user asks about symptoms (headache, cold, cough, constipation, fever), format your response with a structured **Traditional Herbal Recipe & Remedy Guide** (Title, Ingredients with exact quantities, Preparation steps, Bio-active action).\n"
-        "DIRECTIVE FOR FARMERS / PROFITABILITY: If a farmer or user asks in English, Tamil (e.g. கத்தாலை செடி வச்சா லாபமா), Telugu, Hindi, or Malayalam where to sell, market value, profitability, or cultivation practices, format your response with a structured **Farmer Commercial & Profitability Guide** (Cultivation & Soil practices, Market Rate per ton/kg, Net Profit Potential, Direct Buying Outlets & Government e-CHARAK portals).\n"
+        "DIRECTIVE FOR HEALTH SYMPTOMS: If the user asks about symptoms in English, Tamil (e.g. கோல்ட், சளி, தலைவலி, இருமல்), Telugu, Hindi, or Malayalam, format your response with a structured **Traditional Herbal Recipe & Remedy Guide** (Title, Ingredients with exact quantities like 1 tsp/250ml/8 leaves, Preparation steps, Bio-active action).\n"
+        "DIRECTIVE FOR FARMERS / PROFITABILITY: If a farmer or user asks where to sell, market value, profitability, or cultivation practices, format your response with a structured **Farmer Commercial & Profitability Guide** (Cultivation practices, Market Rate per ton/kg, Net Profit Potential, Direct Buying Outlets & Government e-CHARAK portals).\n"
         "Always write responses in clean English letters so the Text-to-Speech audio reader can speak it out loud clearly."
     )
 
@@ -190,7 +190,37 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
     except Exception as e:
         print(f"OpenRouter fast timeout fallback: {e}")
 
-    # 1. Farmer Agricultural, Commercial & Profitability Fallback
+    # 1. Multi-lingual Symptom Recipe Fallback Engine (Priority 1 for health queries)
+    recipe = None
+    for target_sym, aliases in MULTILINGUAL_KEYWORDS.items():
+        if any(alias in q_lower for alias in aliases):
+            recipe = RECIPE_TEMPLATES.get(target_sym)
+            break
+
+    if recipe:
+        ing_list = "\n".join([f"- **{ing}**" for ing in recipe["ingredients"]])
+        step_list = "\n".join([f"{i+1}. {step}" for i, step in enumerate(recipe["steps"])])
+
+        plant_name = context_plants[0]['name'] if context_plants else "Tulsi (Holy Basil)"
+        bot_name = context_plants[0]['botanical_name'] if context_plants else "Ocimum tenuiflorum"
+        consts = ", ".join(context_plants[0]['constituents']) if context_plants else "Eugenol, Gingerol, Active Bio-Alkaloids"
+
+        ans = (
+            f"### 🍵 Recommended Herbal Recipe: *{recipe['title']}*\n\n"
+            f"Here is a traditional home remedy using dataset-grounded medicinal flora like **{plant_name}** (*{bot_name}*):\n\n"
+            f"#### 🛒 Required Ingredients\n{ing_list}\n\n"
+            f"#### 🥣 Step-by-Step Preparation & Dosage\n{step_list}\n\n"
+            f"---\n"
+            f"#### 🧪 Bio-Active Compounds & Mechanism\n"
+            f"• **Active Phytochemicals**: {consts}\n"
+            f"• **Mechanism of Action**: Provides potent anti-inflammatory, antimicrobial, and respiratory soothing benefits validated in traditional ethnopharmacology."
+        )
+        return {
+            "answer": ans,
+            "sources": sources if sources else ["IEEE MPI Dataset"]
+        }
+
+    # 2. Farmer Agricultural, Commercial & Profitability Fallback
     if any(fk in q_lower for fk in FARMER_KEYWORDS):
         crop_name = "Aloe Vera (Kattarazhai)" if ("கத்தாலை" in q_lower or "aloe" in q_lower) else (context_plants[0]['name'] if context_plants else "Medicinal Crops (Tulsi / Ashwagandha / Aloe Vera)")
         bot_name = "Aloe barbadensis miller" if ("கத்தாலை" in q_lower or "aloe" in q_lower) else (context_plants[0]['botanical_name'] if context_plants else "Ocimum tenuiflorum")
@@ -216,36 +246,6 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
             "sources": sources if sources else ["IEEE MPI Dataset", "National Medicinal Plants Board (NMPB)"]
         }
 
-    # 2. Multi-lingual Symptom Recipe Fallback Engine
-    recipe = None
-    for target_sym, aliases in MULTILINGUAL_KEYWORDS.items():
-        if any(alias in q_lower for alias in aliases):
-            recipe = RECIPE_TEMPLATES.get(target_sym)
-            break
-
-    if recipe:
-        ing_list = "\n".join([f"- **{ing}**" for ing in recipe["ingredients"]])
-        step_list = "\n".join([f"{i+1}. {step}" for i, step in enumerate(recipe["steps"])])
-
-        plant_name = context_plants[0]['name'] if context_plants else "Tulsi / Coriander"
-        bot_name = context_plants[0]['botanical_name'] if context_plants else "Ocimum / Coriandrum"
-        consts = ", ".join(context_plants[0]['constituents']) if context_plants else "Eugenol, Linalool, Active Bio-Alkaloids"
-
-        ans = (
-            f"### 🍵 Recommended Herbal Recipe: *{recipe['title']}*\n\n"
-            f"Here is a traditional home remedy using dataset-grounded medicinal flora like **{plant_name}** (*{bot_name}*):\n\n"
-            f"#### 🛒 Required Ingredients\n{ing_list}\n\n"
-            f"#### 🥣 Step-by-Step Preparation & Dosage\n{step_list}\n\n"
-            f"---\n"
-            f"#### 🧪 Bio-Active Compounds & Mechanism\n"
-            f"• **Active Phytochemicals**: {consts}\n"
-            f"• **Mechanism of Action**: Provides potent anti-inflammatory, vascular tension relief, and symptom-soothing benefits validated in traditional ethnopharmacology."
-        )
-        return {
-            "answer": ans,
-            "sources": sources if sources else ["IEEE MPI Dataset"]
-        }
-
     # Default structured response for general queries
     if context_plants:
         p0 = context_plants[0]
@@ -266,19 +266,17 @@ Siddha Profile: {p['siddha'].get('name', '')} - Suvai: {p['siddha'].get('suvai',
         )
     else:
         ans = (
-            f"### 🌿 Recommended Herbal Remedy for *\"{question}\"*\n\n"
-            f"#### 🍵 Recommended Recipe: *Tulsi Ginger Herbal Tea*\n\n"
+            f"### 🍵 Recommended Herbal Recipe: *Tulsi Ginger Honey Kudineer*\n\n"
             f"#### 🛒 Required Ingredients\n"
-            f"- **Tulsi (Holy Basil) Leaves**: 6 to 8 fresh leaves\n"
+            f"- **Tulsi (Holy Basil) Leaves**: 8 to 10 fresh leaves\n"
             f"- **Fresh Ginger**: 1 inch crushed piece\n"
             f"- **Black Pepper**: 3 crushed peppercorns\n"
             f"- **Honey**: 1 tablespoon\n"
             f"- **Water**: 300 ml\n\n"
-            f"#### 🥣 Step-by-Step Instructions\n"
-            f"1. Boil 300 ml of water with ginger, Tulsi leaves, and black pepper.\n"
-            f"2. Simmer for 5 minutes until reduced to 200 ml.\n"
-            f"3. Strain, add honey, and sip warm twice daily.\n\n"
-            f"• **Bio-Active Action**: Rich in eugenol and gingerol to relieve inflammation and soothe body discomfort."
+            f"#### 🥣 Step-by-Step Preparation & Dosage\n"
+            f"1. Boil 300 ml of water with crushed ginger, Tulsi leaves, and peppercorns for 6 minutes.\n"
+            f"2. Strain, add honey, and sip warm twice daily.\n\n"
+            f"• **Bio-Active Action**: Rich in eugenol and gingerol to relieve cold, cough, and sore throat."
         )
 
     return {

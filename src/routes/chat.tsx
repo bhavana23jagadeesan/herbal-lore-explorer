@@ -237,11 +237,13 @@ function ChatPage() {
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err) {
       console.error(err);
-      let fallbackAnswer = "Based on the IEEE MPI dataset, traditional herbal remedies like Tulsi, Ginger, Coriander, and Aloe Vera provide natural therapeutic benefits.";
+      let fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Tulsi Ginger Honey Kudineer*\n\n#### 🛒 Required Ingredients\n- **Fresh Tulsi Leaves**: 8 to 10 leaves\n- **Crushed Fresh Ginger**: 1 inch piece\n- **Black Pepper**: 3 crushed peppercorns\n- **Raw Honey**: 1 tablespoon\n- **Water**: 300 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil 300 ml water with ginger, Tulsi leaves, and black pepper for 6 minutes.\n2. Strain into a cup, mix in honey, and drink warm twice daily.\n\n• **Action**: Provides powerful antiviral and respiratory cold & cough relief.";
       const lower = userText.toLowerCase();
 
       if (lower.includes("headache") || lower.includes("தலைவலி") || lower.includes("தலை")) {
         fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Coriander Ginger Relief Infusion*\n\n#### 🛒 Required Ingredients\n- **Crushed Coriander Seeds (Kothamalli)**: 1 tablespoon\n- **Fresh Crushed Ginger**: 1/2 inch piece\n- **Palm Jaggery / Honey**: 1 teaspoon\n- **Water**: 300 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil coriander seeds and ginger in 300 ml water for 6 minutes.\n2. Strain into a cup, add jaggery/honey, and sip warm.\n\n• **Action**: Relieves head pressure and vascular headache tension.";
+      } else if (lower.includes("cold") || lower.includes("sali") || lower.includes("சளி") || lower.includes("கோல்ட்") || lower.includes("கோல்டா") || lower.includes("கோல்டாக") || lower.includes("இருமல்")) {
+        fallbackAnswer = "### 🍵 Recommended Herbal Recipe: *Tulsi Ginger Honey Kudineer*\n\n#### 🛒 Required Ingredients\n- **Fresh Tulsi Leaves**: 8 to 10 leaves\n- **Crushed Fresh Ginger**: 1 inch piece\n- **Black Pepper**: 3 crushed peppercorns\n- **Raw Honey**: 1 tablespoon\n- **Water**: 300 ml\n\n#### 🥣 Preparation & Dosage\n1. Boil 300 ml water with ginger, Tulsi leaves, and black pepper for 6 minutes.\n2. Strain into a cup, mix in honey, and drink warm twice daily.\n\n• **Action**: Provides powerful antiviral and respiratory cold & cough relief.";
       } else if (lower.includes("sell") || lower.includes("market") || lower.includes("cultivat") || lower.includes("பயிரிடு") || lower.includes("விற்க") || lower.includes("கத்தாலை") || lower.includes("லாபம்") || lower.includes("லாபமா") || lower.includes("செடி")) {
         fallbackAnswer = "### 🌾 Farmer Commercial & Profitability Guide for **Aloe Vera (Kattarazhai)**\n\nYes! Cultivating Aloe Vera is highly profitable for farmers:\n\n#### 💰 Estimated Market Value & Net Profit\n• **Fresh Leaf Price**: ₹6,000 – ₹12,000 per Ton.\n• **Annual Yield**: 15 to 20 Tons per acre annually.\n• **Net Profit**: ₹80,000 to ₹150,000 per acre per year!\n\n#### 🏪 Where to Sell & Procurement Outlets\n1. **Government e-CHARAK Portal**: List produce directly on [e-CHARAK Portal](https://echarak.in).\n2. **Pharma & Cosmetic Companies**: CAVINKARE, Dabur, Himalaya Wellness, IMPCOPS, Patanjali.\n\n#### 🌱 Best Cultivation Practices\n• **Soil & Irrigation**: Dry sandy loam soil (pH 6.5–8.5). Drip irrigation once every 10 days.";
       }
@@ -424,7 +426,7 @@ function ChatPage() {
 
           <input
             type="text"
-            placeholder="Ask about headache, cold, constipation, or where to sell crops, market value..."
+            placeholder="Ask about cold, cough, headache, constipation, or where to sell crops..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
