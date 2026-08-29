@@ -1,8 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { api, type IdentifyResponse } from "@/lib/api";
-import { Camera, CheckCircle2, Sparkles, ArrowRight, RefreshCw } from "lucide-react";
+import { Camera, CheckCircle2, Sparkles, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/identify")({
@@ -98,54 +98,23 @@ function IdentifyPage() {
           </div>
         )}
 
-        {/* Results Card */}
+        {/* Clean Results Display */}
         {result && (
-          <div className="glass-strong rounded-3xl p-6 space-y-6 border border-emerald-500/30">
-            <div className="flex items-start justify-between">
+          <div className="glass-strong rounded-3xl p-6 border border-emerald-500/30">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="size-8 text-emerald-400 shrink-0" />
                 <div>
                   <h3 className="font-display text-2xl font-bold">{result.plant_name}</h3>
                   <p className="text-sm italic text-muted-foreground">
-                    Confidence: {(result.confidence * 100).toFixed(1)}%
+                    Match Confidence: {(result.confidence * 100).toFixed(1)}%
                   </p>
                 </div>
               </div>
               <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 rounded-full px-3 py-1">
-                Verified Match
+                Verified Species
               </Badge>
             </div>
-
-            {/* Confidence Bar */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Model Confidence</span>
-                <span>{(result.confidence * 100).toFixed(1)}%</span>
-              </div>
-              <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full"
-                  style={{ width: `${result.confidence * 100}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Details Preview */}
-            {result.details && (result.details as any).id && (
-              <div className="pt-4 border-t border-border/60 flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">IEEE MPI Database Record</p>
-                  <p className="text-sm font-semibold">{(result.details as any).botanicalName}</p>
-                </div>
-                <Link
-                  to="/plants/$plantId"
-                  params={{ plantId: (result.details as any).id }}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-                >
-                  View Full Profile <ArrowRight className="size-3.5" />
-                </Link>
-              </div>
-            )}
           </div>
         )}
       </div>

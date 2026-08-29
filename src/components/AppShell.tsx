@@ -15,7 +15,8 @@ import {
   LogOut,
   UserPlus,
   LogIn,
-  CheckCircle2,
+  Heart,
+  KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
@@ -57,11 +58,17 @@ function ThemeToggle() {
 
 function MandatoryAuthModal({ onAuthenticated }: { onAuthenticated: () => void }) {
   const [isRegister, setIsRegister] = useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("researcher@herbivore.org");
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("password123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const autofillDemo = () => {
+    setEmail("researcher@herbivore.org");
+    setPassword("password123");
+    setIsRegister(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,22 +99,40 @@ function MandatoryAuthModal({ onAuthenticated }: { onAuthenticated: () => void }
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-xl">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/85 backdrop-blur-xl">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="w-full max-w-md glass-strong rounded-3xl p-6 sm:p-8 border border-primary/30 shadow-2xl space-y-6"
       >
         <div className="text-center space-y-2">
-          <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/20 text-primary">
-            <Lock className="size-7" />
+          <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-tr from-rose-500 via-purple-500 to-emerald-400 text-white shadow-lg">
+            <Heart className="size-7 fill-white" />
           </div>
           <h2 className="font-display text-2xl font-bold">
             {isRegister ? "Create Vanaspati Account" : "Sign In to Access Vanaspati"}
           </h2>
           <p className="text-xs text-muted-foreground">
-            Please log in or register to explore the IEEE MPI Medicinal Plant Dataset & AI Assistant.
+            Enter your credentials or use the demo login to explore the IEEE MPI Medicinal Plant Dataset.
           </p>
+        </div>
+
+        {/* Visible Demo Credentials Box */}
+        <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1.5 text-left">
+          <div className="flex items-center justify-between font-bold text-emerald-400">
+            <span className="flex items-center gap-1">
+              <KeyRound className="size-3.5" /> Demo Login Credentials
+            </span>
+            <button
+              type="button"
+              onClick={autofillDemo}
+              className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300 hover:bg-emerald-500/30 transition-colors"
+            >
+              1-Click Autofill
+            </button>
+          </div>
+          <p className="text-muted-foreground">• Email: <strong className="text-foreground select-all">researcher@herbivore.org</strong></p>
+          <p className="text-muted-foreground">• Password: <strong className="text-foreground select-all">password123</strong></p>
         </div>
 
         {error && (
@@ -134,7 +159,7 @@ function MandatoryAuthModal({ onAuthenticated }: { onAuthenticated: () => void }
             <label className="block text-xs font-semibold text-muted-foreground mb-1">Email Address</label>
             <input
               type="email"
-              placeholder="user@example.com"
+              placeholder="researcher@herbivore.org"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -167,7 +192,7 @@ function MandatoryAuthModal({ onAuthenticated }: { onAuthenticated: () => void }
               </>
             ) : (
               <>
-                <LogIn className="size-4" /> Sign In to Vanaspati
+                <LogIn className="size-4" /> Sign In & Explore
               </>
             )}
           </button>
@@ -186,7 +211,7 @@ function MandatoryAuthModal({ onAuthenticated }: { onAuthenticated: () => void }
             </p>
           ) : (
             <p className="text-muted-foreground">
-              New to Vanaspati?{" "}
+              New user?{" "}
               <button
                 onClick={() => setIsRegister(true)}
                 className="font-bold text-primary hover:underline"
@@ -226,12 +251,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 px-3 pt-3 sm:px-6">
         <div className="glass-strong mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-full px-4 py-2.5">
           <Link to="/" className="flex min-w-0 items-center gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
-              <Leaf className="size-4.5" />
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-tr from-rose-500 via-purple-500 to-emerald-400 text-white shadow-md">
+              <Heart className="size-4.5 fill-white" />
             </span>
             <span className="min-w-0">
-              <span className="block truncate font-display text-base font-semibold leading-tight">
+              <span className="block truncate font-display text-base font-semibold leading-tight flex items-center gap-1.5">
                 Vanaspati
+                <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/30">
+                  Lovable
+                </span>
               </span>
               <span className="hidden truncate text-[11px] text-muted-foreground sm:block">
                 MPI Heritage Explorer
@@ -302,8 +330,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <main className="mx-auto w-full max-w-7xl px-4 pb-24 pt-8 sm:px-6">{children}</main>
 
-      <footer className="border-t border-border/60 py-8 text-center text-xs text-muted-foreground">
-        Grounded in the IEEE MPI dataset · Educational use only, not medical advice
+      <footer className="border-t border-border/60 py-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+        <Heart className="size-3.5 text-rose-500 fill-rose-500" /> Powered by Lovable · Grounded in IEEE MPI dataset
       </footer>
     </div>
   );
