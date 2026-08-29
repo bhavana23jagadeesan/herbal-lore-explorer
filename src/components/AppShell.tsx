@@ -15,7 +15,6 @@ import {
   LogOut,
   UserPlus,
   LogIn,
-  Heart,
   KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -106,8 +105,8 @@ function MandatoryAuthModal({ onAuthenticated }: { onAuthenticated: () => void }
         className="w-full max-w-md glass-strong rounded-3xl p-6 sm:p-8 border border-primary/30 shadow-2xl space-y-6"
       >
         <div className="text-center space-y-2">
-          <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-gradient-to-tr from-rose-500 via-purple-500 to-emerald-400 text-white shadow-lg">
-            <Heart className="size-7 fill-white" />
+          <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/20 text-primary">
+            <Lock className="size-7" />
           </div>
           <h2 className="font-display text-2xl font-bold">
             {isRegister ? "Create Vanaspati Account" : "Sign In to Access Vanaspati"}
@@ -251,15 +250,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 px-3 pt-3 sm:px-6">
         <div className="glass-strong mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-full px-4 py-2.5">
           <Link to="/" className="flex min-w-0 items-center gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-tr from-rose-500 via-purple-500 to-emerald-400 text-white shadow-md">
-              <Heart className="size-4.5 fill-white" />
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+              <Leaf className="size-4.5" />
             </span>
             <span className="min-w-0">
-              <span className="block truncate font-display text-base font-semibold leading-tight flex items-center gap-1.5">
+              <span className="block truncate font-display text-base font-semibold leading-tight">
                 Vanaspati
-                <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/30">
-                  Lovable
-                </span>
               </span>
               <span className="hidden truncate text-[11px] text-muted-foreground sm:block">
                 MPI Heritage Explorer
@@ -330,8 +326,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <main className="mx-auto w-full max-w-7xl px-4 pb-24 pt-8 sm:px-6">{children}</main>
 
-      <footer className="border-t border-border/60 py-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-1.5">
-        <Heart className="size-3.5 text-rose-500 fill-rose-500" /> Powered by Lovable · Grounded in IEEE MPI dataset
+      <footer className="border-t border-border/60 py-8 text-center text-xs text-muted-foreground">
+        Grounded in the IEEE MPI dataset · Educational use only, not medical advice
       </footer>
     </div>
   );
