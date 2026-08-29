@@ -7,7 +7,6 @@ import {
   MessageCircle,
   Camera,
   Share2,
-  Gamepad2,
   LayoutDashboard,
   Menu,
   X,
@@ -21,7 +20,6 @@ const nav = [
   { to: "/chat", label: "Assistant", icon: MessageCircle },
   { to: "/identify", label: "Identify", icon: Camera },
   { to: "/graph", label: "Graph", icon: Share2 },
-  { to: "/play", label: "Play", icon: Gamepad2 },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 ] as const;
 

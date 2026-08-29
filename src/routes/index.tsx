@@ -10,7 +10,6 @@ import {
   MessageCircle,
   Camera,
   Share2,
-  Gamepad2,
   ArrowRight,
   ShieldCheck,
   BookOpen,
@@ -166,24 +165,6 @@ function Index() {
           </div>
           <div className="mt-6 flex items-center text-xs font-semibold text-primary group-hover:translate-x-1 transition-transform">
             View Graph <ArrowRight className="ml-1 size-3.5" />
-          </div>
-        </Link>
-
-        <Link
-          to="/play"
-          className="glass lift group flex flex-col justify-between rounded-3xl p-6 transition-all hover:border-primary/50"
-        >
-          <div>
-            <div className="grid size-12 place-items-center rounded-2xl bg-rose-500/10 text-rose-400">
-              <Gamepad2 className="size-6" />
-            </div>
-            <h3 className="mt-4 font-display text-xl font-semibold">Interactive Quiz & XP</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Test your botanical knowledge, earn XP points, level up, and unlock achievements.
-            </p>
-          </div>
-          <div className="mt-6 flex items-center text-xs font-semibold text-primary group-hover:translate-x-1 transition-transform">
-            Start Quiz <ArrowRight className="ml-1 size-3.5" />
           </div>
         </Link>
 
